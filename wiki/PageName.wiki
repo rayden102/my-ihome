@@ -8,6 +8,9 @@ Helpful links:
 
   * RS-485: Passive failsafe for an idle bus - [http://www.ti.com/lit/an/slyt324/slyt324.pdf go2PDF]
 
+  * RS-422 and RS-485 Standards Overview and System Configurations - [http://www.ti.com/lit/an/slla070d/slla070d.pdf go2PDF]
+
+
 = Details =
 http://www.avrfreaks.net/index.php?name=PNphpBB2&file=viewtopic&t=25711&highlight=mcpm
 Add your content here.  Format your content with:
