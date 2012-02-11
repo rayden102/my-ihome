@@ -3,7 +3,9 @@
 = RS-485 information =
 
 Helpful links:
-1. Guidelines for Proper Wiring of an RS-485 (TIA/EIA-485-A) Network [http://www.maxim-ic.com/app-notes/index.mvp/id/763 read]
+1. Guidelines for Proper Wiring of an RS-485 (TIA/EIA-485-A) Network 
+
+[http://www.maxim-ic.com/app-notes/index.mvp/id/763 read]
 
 = Details =
 http://www.avrfreaks.net/index.php?name=PNphpBB2&file=viewtopic&t=25711&highlight=mcpm
