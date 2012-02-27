@@ -1,0 +1,4 @@
+#summary Homemade PCBs.
+
+= Poradnik =
+ * [http://diy.elektroda.eu/plytki-drukowane-od-a-do-z/ Plytki drukowane A..Z]
