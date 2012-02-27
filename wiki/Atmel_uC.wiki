@@ -7,3 +7,6 @@
 = Chipsets =
  # ATxmega32A4U [http://www.atmel.com/devices/ATXMEGA32A4U.aspx?tab=parameters features description]
  # Manual [http://www.atmel.com/Images/doc8331.pdf]
+
+= Atmel QTouch Library =
+ # Description [http://www.atmel.com/products/touchsolutions/touchsoftware/default.aspx]
