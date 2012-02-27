@@ -1,0 +1,5 @@
+#summary Summary of Atmel microControllers.
+
+= Programator =
+
+ * USBTiny-MKII SLIM (klon AVRISP-MKII) [http://diy.elektroda.eu/programator-usbtiny-mkii-slim/ mkII]
