@@ -13,3 +13,6 @@
 = Technical Library =
  # http://www.bb-elec.com/technical_library.asp
  # touch design [http://www.atmel.com/Images/doc10752.pdf]
+
+= AVR =
+ # AVR Beginners [http://www.avrbeginners.net/]
