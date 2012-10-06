@@ -17,4 +17,7 @@
 // To achieve 10Hz resolution the period value must be set to 3125
 #define TIMER_HEARTBEAT_PERIOD	(3125)
 
+// Enable USARTD0
+#define CONF_BOARD_ENABLE_USARTD0
+
 #endif // CONF_BOARD_H
