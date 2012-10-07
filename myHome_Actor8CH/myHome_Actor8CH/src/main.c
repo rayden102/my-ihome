@@ -42,6 +42,47 @@ uint8_t fifo_rs485_receive_buffer [FIFO_RS485_RECEIVE_BUFFER_LENGTH];
  */
 fifo_desc_t fifo_rs485_receive_buffer_desc;
 
+/* *********************************************************************** */
+/* ********************** RS-485 PROTOCOL RELATED ************************ */
+/* *********************************************************************** */
+// +----------------------------------------------+
+// | RS-485 control pin |        Function		  |
+// |--------------------|-------------------------|
+// | LOW				| Receiver output enabled |
+// |--------------------|-------------------------|
+// | HIGH				| Driver output enabled   |
+// +----------------------------------------------+
+#define RS485_DRIVER_CONTROL_GPIO IOPORT_CREATE_PIN(PORTD,0)
+
+/**
+ * \brief Enable Receiver output in RS-485 chip
+ *
+ * This function enables receiver (RO) output in RS-485
+ * transceiver device.
+ *
+ * \param none.
+ *
+ * \retval none
+ */
+void rs485_receiver_enable(void)
+{
+	ioport_set_pin_low(RS485_DRIVER_CONTROL_GPIO);
+}	// rs485_receiver_enable()
+
+/**
+ * \brief Enable Driver output in RS-485 chip
+ *
+ * This function enables driver (DE) output in RS-485
+ * transceiver device.
+ *
+ * \param none.
+ *
+ * \retval none
+ */
+void rs485_driver_enable(void)
+{
+	ioport_set_pin_high(RS485_DRIVER_CONTROL_GPIO);
+}	// rs485_driver_enable()
 
 /* *********************************************************************** */
 /* ************************ FUNCTION DEFINITIONS ************************* */
@@ -127,8 +168,9 @@ int main (void)
 	// Initialize USART driver in RS232 mode
 	usart_init_rs232(USART_RS485, &USART_RS485_OPTIONS);
 
-	
-	// TODO: Initialize RS-485 transceiver
+	// *** Initialize RS-485 transceiver ***
+	// Initially go to LOW and this will enable receiver output
+	ioport_configure_pin(RS485_DRIVER_CONTROL_GPIO, IOPORT_INIT_LOW | IOPORT_DIR_OUTPUT);
 	
 	// TODO: Read status of GPIOs which control relays
 
