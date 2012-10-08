@@ -85,6 +85,11 @@ void rs485_driver_enable(void)
 }	// rs485_driver_enable()
 
 /* *********************************************************************** */
+/* ********************** RELAYS CONTROL RELATED ************************* */
+/* *********************************************************************** */
+volatile uint8_t g_u8_relays_rtate = 0;
+
+/* *********************************************************************** */
 /* ************************ FUNCTION DEFINITIONS ************************* */
 /* *********************************************************************** */
 
@@ -146,7 +151,7 @@ int main (void)
 	/* ********************** RS-485 FIFO CONFIGURATION ********************** */
 	/* *********************************************************************** */
 	
-	// Initialize FIFO for RS-485 transmission
+	// *** Initialize FIFO for RS-485 transmission ***
 	fifo_init( &fifo_rs485_receive_buffer_desc,
 			   &fifo_rs485_receive_buffer[0],
 			   FIFO_RS485_RECEIVE_BUFFER_LENGTH );
@@ -155,8 +160,9 @@ int main (void)
 	/* ************************* USART CONFIGURATION ************************* */
 	/* *********************************************************************** */
 	
-	// Initialize USART
+	// *** Initialize USART ****
 	// USART options
+	// TODO: if MPCM then use suitable configuration
 	static usart_rs232_options_t USART_RS485_OPTIONS =
 	{
 		.baudrate	= USART_RS485_BAUDRATE,
@@ -170,7 +176,7 @@ int main (void)
 
 	// *** Initialize RS-485 transceiver ***
 	// Initially go to LOW and this will enable receiver output
-	ioport_configure_pin(RS485_DRIVER_CONTROL_GPIO, IOPORT_INIT_LOW | IOPORT_DIR_OUTPUT);
+	ioport_configure_pin(RS485_DRIVER_CONTROL_GPIO, (IOPORT_INIT_LOW | IOPORT_DIR_OUTPUT));
 	
 	// TODO: Read status of GPIOs which control relays
 
