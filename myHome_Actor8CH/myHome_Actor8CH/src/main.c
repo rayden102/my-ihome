@@ -11,6 +11,11 @@
  */
 #include <asf.h>
 
+/*
+ * Include header file for handling all communication details.
+ */
+#include "myHome_Comm.h"
+
 /* *********************************************************************** */
 /* *********************** RS-485 FIFO DEFINITION ************************ */
 /* *********************************************************************** */
@@ -89,6 +94,12 @@ void rs485_driver_enable(void)
 /* *********************************************************************** */
 volatile uint8_t g_u8_relays_rtate = 0;
 
+
+/* *********************************************************************** */
+/* ******************** MY_HOME COMMUNICATION DATA *********************** */
+/* *********************************************************************** */
+data_frame_desc_t comm_data_frame_desc;
+
 /* *********************************************************************** */
 /* ************************ FUNCTION DEFINITIONS ************************* */
 /* *********************************************************************** */
@@ -102,7 +113,36 @@ volatile uint8_t g_u8_relays_rtate = 0;
 static void heartbeat_ovf_irq_callback(void)
 {
 	// TODO: put heartbeat timer functionality here
+	
+	// Check if entire data frame was received
+	uint8_t u8FifoSize = fifo_get_used_size(&fifo_rs485_receive_buffer_desc);
+	if (A8CH_DATA_FRAME_SIZE == u8FifoSize)
+	{
+		// Complete data frame received
+		// Transfer received data to myHome Communication Data format
+		myHome_Comm_Data_Get
+		
+		// Flush FIFO
+		fifo_flush(&fifo_rs485_receive_buffer_desc);
+	}
+	
+	
 }	// heartbeat_ovf_irq_callback()
+
+/*! \brief Receive complete interrupt service routine.
+ *
+ *  Receive complete interrupt service routine.
+ *  Calls the common receive complete handler with pointer to the correct USART
+ *  as argument.
+ */
+ISR(USARTD0_RXC_vect)
+{
+	// Retrieve received data from DATA register. It will automatically clear RXCIF.
+	uint8_t u8Data = (USART_RS485)->DATA;
+	
+	// Put new element into FIFO. No check, the buffer should have enough capacity to hold it.
+	fifo_push_uint8_nocheck(&fifo_rs485_receive_buffer_desc, u8Data);
+}
 
 /* *********************************************************************** */
 /* *********************** MAIN LOOP STARTS HERE ************************* */
@@ -155,6 +195,11 @@ int main (void)
 	fifo_init( &fifo_rs485_receive_buffer_desc,
 			   &fifo_rs485_receive_buffer[0],
 			   FIFO_RS485_RECEIVE_BUFFER_LENGTH );
+	
+	/* *********************************************************************** */
+	/* ************************* COMMUNICATION DATA  ************************* */
+	/* *********************************************************************** */
+	myHome_Comm_Init(&comm_data_frame_desc);
 	
 	/* *********************************************************************** */
 	/* ************************* USART CONFIGURATION ************************* */
