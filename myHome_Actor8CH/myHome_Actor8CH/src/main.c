@@ -69,7 +69,7 @@ fifo_desc_t fifo_rs485_receive_buffer_desc;
  *
  * \retval none
  */
-void rs485_receiver_enable(void)
+static inline void rs485_receiver_enable(void)
 {
 	ioport_set_pin_low(RS485_DRIVER_CONTROL_GPIO);
 }	// rs485_receiver_enable()
@@ -84,7 +84,7 @@ void rs485_receiver_enable(void)
  *
  * \retval none
  */
-void rs485_driver_enable(void)
+static inline void rs485_driver_enable(void)
 {
 	ioport_set_pin_high(RS485_DRIVER_CONTROL_GPIO);
 }	// rs485_driver_enable()
@@ -94,6 +94,45 @@ void rs485_driver_enable(void)
 /* *********************************************************************** */
 volatile uint8_t g_u8_relays_rtate = 0;
 
+/* *********************************************************************** */
+/* ************************ SELF CONFIGURATION *************************** */
+/* *********************************************************************** */
+// -----------------
+//  1    2    3    4
+// PD4, PD5, PD6, PD7
+// ------------------
+#define A8CH_ADDRESS1_GPIO IOPORT_CREATE_PIN(PORTD,4)
+#define A8CH_ADDRESS2_GPIO IOPORT_CREATE_PIN(PORTD,5)
+#define A8CH_ADDRESS3_GPIO IOPORT_CREATE_PIN(PORTD,6)
+#define A8CH_ADDRESS4_GPIO IOPORT_CREATE_PIN(PORTD,7)
+
+/**
+ *  \brief Returns 8-bit device identifier comprised of
+ *		   4 higher bits group (nibble) of device type and
+ *         4 lower bits  group (nibble) of encoded address.
+ *
+ *  \return Identifier
+ */
+static uint8_t get_device_ID(void)
+{
+	uint8_t u8Address = 0;
+	
+	// Configure pins (4-7) group of PORTD as inputs
+	ioport_configure_group(IOPORT_PORTD, 0xF0, IOPORT_DIR_INPUT);
+	
+	// Put in device type into higher nibble
+	u8Address = ((A8CH_DEVICE_TYPE << 4) & 0xF0);
+	
+	// Read all 4 pins at once
+	u8Address |= (((PORTD.IN & 0xF0) >> 4) & 0x0F);
+	// bPinState = ioport_get_value(A8CH_ADDRESS1_GPIO);
+	
+	return u8Address;
+};	// get_device_ID()
+
+// Variable to store device identifier configured by value of DIP switch and
+// pre-defined device type
+volatile uint8_t g_u8_device_id = 0;
 
 /* *********************************************************************** */
 /* ******************** MY_HOME COMMUNICATION DATA *********************** */
@@ -116,11 +155,18 @@ static void heartbeat_ovf_irq_callback(void)
 	
 	// Check if entire data frame was received
 	uint8_t u8FifoSize = fifo_get_used_size(&fifo_rs485_receive_buffer_desc);
+	
+	// Process if complete data frame received
 	if (A8CH_DATA_FRAME_SIZE == u8FifoSize)
 	{
-		// Complete data frame received
 		// Transfer received data to myHome Communication Data format
-		myHome_Comm_Data_Get
+		myHome_Comm_Data_CopyFrom(&fifo_rs485_receive_buffer_desc,
+								  &comm_data_frame_desc);
+		
+		// Check if message is intended for this device
+		// TODO: what if MPCM is ON? is it just a double check?
+		
+		
 		
 		// Flush FIFO
 		fifo_flush(&fifo_rs485_receive_buffer_desc);
@@ -200,6 +246,12 @@ int main (void)
 	/* ************************* COMMUNICATION DATA  ************************* */
 	/* *********************************************************************** */
 	myHome_Comm_Init(&comm_data_frame_desc);
+	
+	/* *********************************************************************** */
+	/* ************************* SELF CONFIGURATION  ************************* */
+	/* *********************************************************************** */
+	// Read device ID
+	g_u8_device_id = get_device_ID();
 	
 	/* *********************************************************************** */
 	/* ************************* USART CONFIGURATION ************************* */
