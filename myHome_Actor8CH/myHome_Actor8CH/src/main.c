@@ -1,7 +1,7 @@
 /**
  * \file
  *
- * \brief Empty user application template
+ * \brief Interrupt-based code flow model.
  *
  */
 
@@ -15,6 +15,15 @@
  * Include header file for handling all communication details.
  */
 #include "myHome_Comm.h"
+
+/* *********************************************************************** */
+/* ******************** INTERRUPT EVENT DEFINITIONS ********************** */
+/* *********************************************************************** */
+#define EVENT_USARTD0_RXC_bm		(1 << 0)
+#define EVENT_HEARTBEAT_TIMER_bm	(1 << 1)
+
+// Bitmasked flags that describe what interrupt has occurred
+volatile uint16_t gInterruptEvents = 0;
 
 /* *********************************************************************** */
 /* *********************** RS-485 FIFO DEFINITION ************************ */
@@ -92,7 +101,7 @@ static inline void rs485_driver_enable(void)
 /* *********************************************************************** */
 /* ********************** RELAYS CONTROL RELATED ************************* */
 /* *********************************************************************** */
-volatile uint8_t g_u8_relays_rtate = 0;
+volatile uint8_t g_u8_relays_state = 0;
 
 /* *********************************************************************** */
 /* ************************ SELF CONFIGURATION *************************** */
@@ -135,12 +144,28 @@ static uint8_t get_device_ID(void)
 volatile uint8_t g_u8_device_id = 0;
 
 /* *********************************************************************** */
-/* ******************** MY_HOME COMMUNICATION DATA *********************** */
+/* ****************** MY_HOME COMMUNICATION SECTION ********************** */
 /* *********************************************************************** */
-data_frame_desc_t comm_data_frame_desc;
+data_frame_desc_t g_comm_data_frame_desc;
+
+// Retrieve communication command from data descriptor
+static uint8_t getCommCommand(data_frame_desc_t *a_pDataDesc)
+{
+	Assert(NULL != a_pDataDesc);
+	
+	return (uint8_t)(a_pDataDesc->eCommand);
+}
+
+// Processing routines prototypes
+bool processCommand_Status(void);
+bool processCommand_Set(void);
+bool processCommand_GroupSet(void);
+
+// Establish table of pointers to processing functions
+bool (* processingFunctions[])(void) = { processCommand_Status, processCommand_Set, processCommand_GroupSet };
 
 /* *********************************************************************** */
-/* ************************ FUNCTION DEFINITIONS ************************* */
+/* ************************* INTERRUPT HANDLERS ************************** */
 /* *********************************************************************** */
 
 /**
@@ -151,28 +176,8 @@ data_frame_desc_t comm_data_frame_desc;
  */
 static void heartbeat_ovf_irq_callback(void)
 {
-	// TODO: put heartbeat timer functionality here
-	
-	// Check if entire data frame was received
-	uint8_t u8FifoSize = fifo_get_used_size(&fifo_rs485_receive_buffer_desc);
-	
-	// Process if complete data frame received
-	if (A8CH_DATA_FRAME_SIZE == u8FifoSize)
-	{
-		// Transfer received data to myHome Communication Data format
-		myHome_Comm_Data_CopyFrom(&fifo_rs485_receive_buffer_desc,
-								  &comm_data_frame_desc);
-		
-		// Check if message is intended for this device
-		// TODO: what if MPCM is ON? is it just a double check?
-		
-		
-		
-		// Flush FIFO
-		fifo_flush(&fifo_rs485_receive_buffer_desc);
-	}
-	
-	
+	// Be as quick as possible and only set the flag of corresponding event.
+	gInterruptEvents |= EVENT_HEARTBEAT_TIMER_bm;
 }	// heartbeat_ovf_irq_callback()
 
 /*! \brief Receive complete interrupt service routine.
@@ -183,18 +188,76 @@ static void heartbeat_ovf_irq_callback(void)
  */
 ISR(USARTD0_RXC_vect)
 {
+	// Be as quick as possible and only set the flag of corresponding event.
+	gInterruptEvents |= EVENT_USARTD0_RXC_bm;
+}
+
+/* *********************************************************************** */
+/* *************************** EVENT HANDLERS **************************** */
+/* *********************************************************************** */
+static void HandleUSARTD0RXC(void)
+{
 	// Retrieve received data from DATA register. It will automatically clear RXCIF.
 	uint8_t u8Data = (USART_RS485)->DATA;
 	
 	// Put new element into FIFO. No check, the buffer should have enough capacity to hold it.
 	fifo_push_uint8_nocheck(&fifo_rs485_receive_buffer_desc, u8Data);
+	
+	// Clear corresponding event flag
+	gInterruptEvents &= ~EVENT_USARTD0_RXC_bm;
 }
+
+static void HandleHeartbeatTimer(void)
+{
+	// Check if complete data frame was already received
+	uint8_t u8FifoSize = fifo_get_used_size(&fifo_rs485_receive_buffer_desc);
+		
+	// Process if complete data frame received
+	if (A8CH_DATA_FRAME_SIZE == u8FifoSize)
+	{
+		// Translate received data to myHome Communication Data format
+		myHome_Comm_Data_CopyFrom(&fifo_rs485_receive_buffer_desc,
+								  &g_comm_data_frame_desc);
+			
+		// Check if message is intended for this device
+		// TODO: what if MPCM is ON? is it just a double check?
+		if ( g_u8_device_id == g_comm_data_frame_desc.u8DeviceID)
+		{
+			// There is a job to do
+			processingFunctions[getCommCommand(&g_comm_data_frame_desc)]();
+		}
+			
+		// Flush FIFO
+		fifo_flush(&fifo_rs485_receive_buffer_desc);
+	}
+
+	// Clear corresponding event flag
+	gInterruptEvents &= ~EVENT_HEARTBEAT_TIMER_bm;
+}
+
+/*! \brief Function to retrieve current state of output channels.
+ *
+ * 8 output channels are mapped into 8 consequents GPIOs of PORTA.
+ * Since mapping is 1:1 then it's just current state of entire PORTA.
+ * which is returned.
+ 
+ *  \return Byte representing PORTA state. 
+ */
+static inline uint8_t get_output_channels_state(void)
+{
+	return (PORTA_OUT);
+};	// get_output_channels_state()
+
+
 
 /* *********************************************************************** */
 /* *********************** MAIN LOOP STARTS HERE ************************* */
 /* *********************************************************************** */
 int main (void)
 {
+	// Variable to read interrupt event flags
+	uint16_t u16EventFlags;
+	
 	// myHome Actor 8 Channel Relay board based on ATXMEGA16A4U chipset and custom PCB.
 	// Enable interrupts
 	pmic_init();
@@ -228,12 +291,6 @@ int main (void)
 	tc_set_resolution( &TIMER_HEARTBEAT, TIMER_HEARTBEAT_PERIOD );
 
 	/* *********************************************************************** */
-	/* ********************* EOF TIMER CONFIGURATION ************************* */
-	/* *********************************************************************** */
-
-	// TODO: retrieve channels state from NVM and make a set?
-	
-	/* *********************************************************************** */
 	/* ********************** RS-485 FIFO CONFIGURATION ********************** */
 	/* *********************************************************************** */
 	
@@ -245,7 +302,7 @@ int main (void)
 	/* *********************************************************************** */
 	/* ************************* COMMUNICATION DATA  ************************* */
 	/* *********************************************************************** */
-	myHome_Comm_Init(&comm_data_frame_desc);
+	myHome_Comm_Init(&g_comm_data_frame_desc);
 	
 	/* *********************************************************************** */
 	/* ************************* SELF CONFIGURATION  ************************* */
@@ -275,14 +332,53 @@ int main (void)
 	// Initially go to LOW and this will enable receiver output
 	ioport_configure_pin(RS485_DRIVER_CONTROL_GPIO, (IOPORT_INIT_LOW | IOPORT_DIR_OUTPUT));
 	
-	// TODO: Read status of GPIOs which control relays
+	/* *********************************************************************** */
+	/* ********************** OUTPUT CONFIGURATION *************************** */
+	/* *********************************************************************** */
+	// Configure all PORTA pins as outputs
+	ioport_configure_group(IOPORT_PORTA, 0b11111111, IOPORT_DIR_OUTPUT);
+
+	// TODO: retrieve channels state from NVM and make a set?
+
+	// Read current status of GPIOs which control relays PA[0..7]
+	g_u8_relays_state = get_output_channels_state();
 
 	// Start infinite main loop, go to sleep and wait for interruption
 	while( 1 )
 	{
-		/* Go to sleep, everything is handled by interrupts. */
-		sleepmgr_enter_sleep();
-	};
-
+		// Atomic interrupt safe read of global variable storing event flags
+		u16EventFlags = gInterruptEvents;
+		
+		while (u16EventFlags)
+		{
+			// Each handler will clear the relevant bit in global variable gInterruptEvents
+			
+			if (u16EventFlags & EVENT_USARTD0_RXC_bm)
+			{
+				// USART D0 receive interrupt fired up
+				HandleUSARTD0RXC();
+			}
+			
+			if (u16EventFlags & EVENT_HEARTBEAT_TIMER_bm)
+			{
+				// Heartbeat timer overflow interrupt fired up
+				HandleHeartbeatTimer();
+			}
+			
+			u16EventFlags = gInterruptEvents;
+		}
+		
+		// Read the event register again without allowing any new interrupts
+		cpu_irq_disable();
+		if (0 == gInterruptEvents)
+		{
+			cpu_irq_enable();
+			// Go to sleep, everything is handled by interrupts.
+			// An interrupt will cause a wake up and run the while loop
+			sleepmgr_enter_sleep();
+		};
+		
+		cpu_irq_enable();
+	};	// main while(1) loop
 
 }	// main()
