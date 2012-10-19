@@ -157,12 +157,113 @@ static uint8_t getCommCommand(data_frame_desc_t *a_pDataDesc)
 }
 
 // Processing routines prototypes
-bool processCommand_Status(void);
-bool processCommand_Set(void);
-bool processCommand_GroupSet(void);
+status_code_t processCommand_Status(void);
+status_code_t processCommand_Set(void);
+status_code_t processCommand_SetGroup(void);
 
 // Establish table of pointers to processing functions
-bool (* processingFunctions[])(void) = { processCommand_Status, processCommand_Set, processCommand_GroupSet };
+status_code_t (* processingFunctions[])(void) = { processCommand_Status, processCommand_Set, processCommand_SetGroup };
+	
+status_code_t processCommand_Status(void)
+{
+	// TODO: handle status message
+	
+	return STATUS_OK;
+}
+
+/*
+Data byte	Action
+---------------------------------------
+D2			Relay to be changed. [0..7]
+D3			New state value. On/Off.
+D4..D7		Timer for up-time?
+*/
+status_code_t processCommand_Set(void)
+{
+	status_code_t retValue = STATUS_OK;
+	uint8_t		  u8RelayIndex;
+	uint8_t		  u8NewState;
+	
+	// Extract relay index from the received message
+	u8RelayIndex = g_comm_data_frame_desc.u8DataArray[A8CH_SET_RELAY_INDEX_DATA_BYTE];
+	
+	// Check relay index which must be in range 0..7
+	if (u8RelayIndex > A8CH_MAX_RELAY_INDEX)
+	{
+		// Bad data received. Relay index is out of range
+		return (retValue = ERR_BAD_DATA);
+	}
+	
+	// Extract new state from the received message
+	u8NewState = g_comm_data_frame_desc.u8DataArray[A8CH_SET_RELAY_STATE_DATA_BYTE];
+	
+	// Check relay state on/off
+	if ((MYHOME_A8CH_RELAY_OFF != u8NewState) ||
+		(MYHOME_A8CH_RELAY_ON  != u8NewState))
+	{
+		// Bad data received. Unknown new relay state.
+		return (retValue = ERR_BAD_DATA);
+	}
+	
+	// Set new state to a given pin
+	if (MYHOME_A8CH_RELAY_OFF == u8NewState)
+	{
+		// Turn off relay with a given index
+		ioport_set_value(IOPORT_CREATE_PIN(PORTA,u8RelayIndex),false);
+	}
+	else
+	{
+		// Turn on relay with a given index
+		ioport_set_value(IOPORT_CREATE_PIN(PORTA,u8RelayIndex),true);
+	}
+	
+	// TODO: Delay Timer
+	
+	return retValue;
+}
+
+status_code_t processCommand_SetGroup(void)
+{
+	status_code_t retValue = STATUS_OK;
+	uint8_t		  u8RelayGroupMask;
+	uint8_t		  u8NewStateMask;
+	
+	// Extract relay group mask from the received message
+	u8RelayGroupMask = g_comm_data_frame_desc.u8DataArray[A8CH_SET_RELAY_INDEX_DATA_BYTE];
+	
+	// Return if no bit is set. Data corrupted?
+	if (0x00 == u8RelayGroupMask)
+	{
+		// Nothing to do
+		return (retValue = ERR_BAD_DATA);
+	}
+	
+	// Extract new state mask from the received message
+	u8NewStateMask = g_comm_data_frame_desc.u8DataArray[A8CH_SET_RELAY_STATE_DATA_BYTE];
+	
+	// Loop through all relays and set new states
+	for (uint8_t bit = 0; bit < 8; bit++)
+	{
+		if (u8RelayGroupMask & (1 << bit))
+		{
+			// This relay is marked for a state change. Test bit at the same position.
+			if (u8NewStateMask & (1 << bit))
+			{
+				// Turn ON relay with a given index
+				ioport_set_value(IOPORT_CREATE_PIN(PORTA,bit),true);
+			}
+			else
+			{
+				// Turn OFF relay with a given index
+				ioport_set_value(IOPORT_CREATE_PIN(PORTA,bit),false);
+			}
+		}
+	}
+	
+	// TODO: Delay Timer
+
+	return retValue;
+}
 
 /* *********************************************************************** */
 /* ************************* INTERRUPT HANDLERS ************************** */
