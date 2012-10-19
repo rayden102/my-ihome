@@ -17,6 +17,16 @@
 // Device types
 #define A8CH_DEVICE_TYPE		(0x00)
 
+// Maximum relay number
+#define A8CH_MAX_RELAY_INDEX			(7)
+
+#define A8CH_SET_RELAY_INDEX_DATA_BYTE	(0)
+#define A8CH_SET_RELAY_STATE_DATA_BYTE	(1)
+#define A8CH_SET_DELAY_TIMER_DATA_BYTE	(2)
+#define A8CH_SET_UPTIME1_DATA_BYTE		(3)
+#define A8CH_SET_UPTIME2_DATA_BYTE		(4)
+#define A8CH_SET_UPTIME3_DATA_BYTE		(5)
+
 // Commands
 typedef enum
 {
@@ -24,8 +34,15 @@ typedef enum
 	MYHOME_COMM_SET,
 	MYHOME_COMM_GROUPSET,
 	
-	MYHOME_COMM_MAX
+	MYHOME_COMM_UNUSED		= 0xFF
 } MyHomeCommCommands_t;
+
+typedef enum
+{
+	MYHOME_A8CH_RELAY_OFF = 0,
+	MYHOME_A8CH_RELAY_ON  = 1 
+	
+} MyHomeA8CHRelayStates_t;
 
 //! Data Frame descriptor.
 struct data_frame_desc
