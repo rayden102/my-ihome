@@ -98,10 +98,65 @@ static inline void rs485_driver_enable(void)
 	ioport_set_pin_high(RS485_DRIVER_CONTROL_GPIO);
 }	// rs485_driver_enable()
 
-/* *********************************************************************** */
-/* ********************** RELAYS CONTROL RELATED ************************* */
-/* *********************************************************************** */
+
+
+
+/* *******************************************************************//**
+   ********************** DELAY TIMERS  *************************
+   *********************************************************************** */
+
+// Array to store pre-defined delay timer values.
+// TODO: Table generated from excel and included here.
+uint8_t g_u8DelayTimerDataArray[UINT8_MAX] = {0};
+	
+/* *******************************************************************//**
+   ********************** RELAYS CONTROL RELATED *************************
+   *********************************************************************** */
 volatile uint8_t g_u8_relays_state = 0;
+
+//! \brief Structure to hold delay timers data
+struct Channel_Delay_Timer
+{
+	uint32_t u32DelayTimer;			/**< Delay timer in seconds. Must be capable of storing value up to 720000 */
+	uint16_t u16SystemTickCounter;	/**< System ticks counter. Must be capable of storing value SYSTEM_TICK_FREQ */
+};
+
+//! \brief Array of data structure to handle delay timers per channel
+static struct Channel_Delay_Timer A8CH_Delay_Timer_Array[A8CH_RELAY_CHANNELS_COUNT];
+
+//! \brief Bitmask of channels with activated delay timers
+uint8_t g_u8_active_delay_timer_channels = 0;
+
+/**
+ * \brief Delay timer identifier
+ *
+ * Index for delay timer channel to use. Limited by max value configured with \ref
+ * A8CH_RELAY_CHANNELS_COUNT.
+ */
+typedef uint8_t delay_timer_id_t;
+
+// ****** Delay timers related
+static inline void set_delay_timer(delay_timer_id_t a_delayTimer_id, uint8_t a_delayTimerIndex)
+{
+	// Check that delay timer ID is within the A8CH_RELAY_CHANNELS_COUNT range
+	if (a_delayTimer_id < A8CH_RELAY_CHANNELS_COUNT)
+	{
+		// Disable interrupts before tweaking the bitmasks
+		irqflags_t flags;
+		flags = cpu_irq_save();
+
+		// Update delay timer struct with corresponding value in seconds
+		A8CH_Delay_Timer_Array[a_delayTimer_id].u32DelayTimer = g_u8DelayTimerDataArray[a_delayTimerIndex];
+		// Clear system tick count
+		A8CH_Delay_Timer_Array[a_delayTimer_id].u16SystemTickCounter = 0;
+		
+		// Set current delay timer channel bitmasks to active
+		g_u8_active_delay_timer_channels |= (1 << a_delayTimer_id);
+
+		// Restore interrupts
+		cpu_irq_restore(flags);
+	}
+}
 
 /* *********************************************************************** */
 /* ************************ SELF CONFIGURATION *************************** */
@@ -163,7 +218,7 @@ status_code_t processCommand_SetGroup(void);
 
 // Establish table of pointers to processing functions
 status_code_t (* processingFunctions[])(void) = { processCommand_Status, processCommand_Set, processCommand_SetGroup };
-	
+
 status_code_t processCommand_Status(void)
 {
 	// TODO: handle status message
@@ -176,18 +231,20 @@ Data byte	Action
 ---------------------------------------
 D2			Relay to be changed. [0..7]
 D3			New state value. On/Off.
-D4..D7		Timer for up-time?
+D4			Delay Timer
+D5..D7		Not used?
 */
 status_code_t processCommand_Set(void)
 {
 	status_code_t retValue = STATUS_OK;
-	uint8_t		  u8RelayIndex;
-	uint8_t		  u8NewState;
+	uint8_t		  u8RelayIndex;		//!< \brief Relay index extracted from the message
+	uint8_t		  u8NewState;		//!< \brief New state of relay channel
+	uint8_t		  u8DelayTimerIdx;	//!< \brief Index to retreive delay time value from the table
 	
 	// Extract relay index from the received message
 	u8RelayIndex = g_comm_data_frame_desc.u8DataArray[A8CH_SET_RELAY_INDEX_DATA_BYTE];
 	
-	// Check relay index which must be in range 0..7
+	// Check relay index which must be in range <0..7>
 	if (u8RelayIndex > A8CH_MAX_RELAY_INDEX)
 	{
 		// Bad data received. Relay index is out of range
@@ -217,7 +274,14 @@ status_code_t processCommand_Set(void)
 		ioport_set_value(IOPORT_CREATE_PIN(PORTA,u8RelayIndex),true);
 	}
 	
-	// TODO: Delay Timer
+	// Extract delay time index from the received message. Zero means no delay time to be set.
+	u8DelayTimerIdx = g_comm_data_frame_desc.u8DataArray[A8CH_SET_DELAY_TIMER_DATA_BYTE];
+	if (u8DelayTimerIdx)
+	{
+		// Set delay timer for the channel
+		set_delay_timer(u8RelayIndex, u8DelayTimerIdx);
+	}
+	
 	
 	return retValue;
 }
@@ -258,16 +322,16 @@ status_code_t processCommand_SetGroup(void)
 				ioport_set_value(IOPORT_CREATE_PIN(PORTA,bit),false);
 			}
 		}
-	}
+	} // for(...)
 	
 	// TODO: Delay Timer
 
 	return retValue;
 }
 
-/* *********************************************************************** */
-/* ************************* INTERRUPT HANDLERS ************************** */
-/* *********************************************************************** */
+/* *******************************************************************//**
+   ************************* INTERRUPT HANDLERS **************************
+   *********************************************************************** */
 
 /**
  * \brief Timer Counter Overflow interrupt callback function
@@ -293,9 +357,9 @@ ISR(USARTD0_RXC_vect)
 	gInterruptEvents |= EVENT_USARTD0_RXC_bm;
 }
 
-/* *********************************************************************** */
-/* *************************** EVENT HANDLERS **************************** */
-/* *********************************************************************** */
+/* *******************************************************************//**
+   *************************** EVENT HANDLERS ****************************
+   *********************************************************************** */
 static void HandleUSARTD0RXC(void)
 {
 	// Retrieve received data from DATA register. It will automatically clear RXCIF.
