@@ -18,7 +18,7 @@
 #define TIMER_HEARTBEAT_PERIOD	(3125)
 
 // Heartbeat timer frequency
-#define SYSTEM_TICK_FREQ		(10)
+#define A8CH_SYSTEM_TICK_FREQ		(10)
 
 // Number of relay channels present on the board
 #define A8CH_RELAY_CHANNELS_COUNT	(8)
