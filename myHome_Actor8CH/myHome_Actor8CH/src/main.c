@@ -134,9 +134,8 @@ static inline void setChannelState(uint8_t a_u8ChannelId, MyHomeA8CHRelayStates_
    ************************** DELAY TIMERS  ******************************
    *********************************************************************** */
 
-// Array to store pre-defined delay timer values.
-// TODO: Table generated from excel and included here.
-uint8_t g_u8DelayTimeValueArray[UINT8_MAX] = {0};
+// Array to store defined delay timer values.
+#include "A8CH_DelayTimeArray.inc"
 
 //! \brief Structure to hold delay timers data
 struct Channel_Delay_Timer
@@ -171,7 +170,7 @@ static inline void set_delay_timer(delay_timer_id_t a_delayTimerChannel_id, uint
 		flags = cpu_irq_save();
 
 		// Update delay timer structure for this channel with corresponding value in seconds
-		A8CH_Delay_Timer_Array[a_delayTimerChannel_id].u32DelayTimer = g_u8DelayTimeValueArray[a_delayTimerIndex];
+		A8CH_Delay_Timer_Array[a_delayTimerChannel_id].u32DelayTimer = g_u32DelayTimeValueArray[a_delayTimerIndex];
 		// Load system tick counter with frequency value
 		A8CH_Delay_Timer_Array[a_delayTimerChannel_id].u16SystemTickCounter = A8CH_SYSTEM_TICK_FREQ;
 		
@@ -421,7 +420,7 @@ static void HandleUSARTD0RXC(void)
  *         Two main sections are distinguished. First is related to the communication.
  *		   The latter is handling delay timers of each channel.
  *
- *  Communication section is checking if complete RS-485 data frame was received. This is indicated by the current FIFO size.
+ *  In communication section check if complete RS-485 data frame was received is done. This is indicated by the current FIFO size.
  *  In the next step the data from receive buffer is translated into communication data frame descriptor.
  *  If device address contained in is intended for this device then detailed processing occurs.
  *  At the end the FIFO buffer is flushed to be ready to received another portion of data.
