@@ -103,6 +103,18 @@ static inline void rs485_driver_enable(void)
    *********************************************************************** */
 volatile uint8_t g_u8_relays_state = 0;
 
+
+/**
+ * \brief Function to set channel state
+ *
+ * This function sets the state of channel using \ref a_u8ChannelIdchannel variable
+ * and given state in \ref a_channelState argument.
+ *
+ * \param a_u8ChannelId		Channel identifier
+ * \param a_channelState	Channel state (enumeration)
+ *
+ * \retval none.
+ */
 static inline void setChannelState(uint8_t a_u8ChannelId, MyHomeA8CHRelayStates_t a_channelState)
 {
 	// Check if channel ID is within the A8CH_RELAY_CHANNELS_COUNT range
@@ -236,14 +248,14 @@ static uint8_t getCommCommand(data_frame_desc_t *a_pDataDesc)
 }
 
 // Processing routines prototypes
-status_code_t processCommand_Status(void);
-status_code_t processCommand_Set(void);
-status_code_t processCommand_SetGroup(void);
+static status_code_t processCommand_Status(void);
+static status_code_t processCommand_Set(void);
+static status_code_t processCommand_SetGroup(void);
 
 // Establish table of pointers to processing functions
-status_code_t (* processingFunctions[])(void) = { processCommand_Status, processCommand_Set, processCommand_SetGroup };
+static status_code_t (* processingFunctions[])(void) = { processCommand_Status, processCommand_Set, processCommand_SetGroup };
 
-status_code_t processCommand_Status(void)
+static status_code_t processCommand_Status(void)
 {
 	// TODO: handle status message
 	
@@ -258,7 +270,7 @@ D3			New state value. On/Off.
 D4			Delay Timer
 D5..D7		Not used?
 */
-status_code_t processCommand_Set(void)
+static status_code_t processCommand_Set(void)
 {
 	status_code_t retValue = STATUS_OK;
 	uint8_t		  u8RelayIndex;		//!< \brief Relay index extracted from the message
@@ -315,11 +327,11 @@ status_code_t processCommand_Set(void)
 	return retValue;
 }
 
-status_code_t processCommand_SetGroup(void)
+static status_code_t processCommand_SetGroup(void)
 {
 	status_code_t retValue = STATUS_OK;
-	uint8_t		  u8RelayGroupMask;
-	uint8_t		  u8NewStateMask;
+	uint8_t		  u8RelayGroupMask;	//!< \brief Relay index mask extracted from the message
+	uint8_t		  u8NewStateMask;	//!< \brief New state mask of relay channel
 	uint8_t		  u8DelayTimerIdx;	//!< \brief Index to retreive delay time value from the table
 	
 	// Extract relay group mask from the received message
@@ -381,7 +393,7 @@ status_code_t processCommand_SetGroup(void)
  * \brief Timer Counter Overflow interrupt callback function
  *
  * This function is called when an overflow interrupt has occurred on
- * TIMER_EXAMPLE and toggles LED0.
+ * \ref TIMER_HEARTBEAT timer and then the suitable bit is being set.
  */
 static void heartbeat_ovf_irq_callback(void)
 {
@@ -395,7 +407,7 @@ static void heartbeat_ovf_irq_callback(void)
  *  Calls the common receive complete handler with pointer to the correct USART
  *  as argument.
  */
-ISR(USARTD0_RXC_vect)
+ISR(USARTD0_RXC_vect, ISR_BLOCK)
 {
 	// Be as quick as possible and only set the flag of corresponding event.
 	gInterruptEvents |= EVENT_USARTD0_RXC_bm;
@@ -406,7 +418,7 @@ ISR(USARTD0_RXC_vect)
    *********************************************************************** */
 static void HandleUSARTD0RXC(void)
 {
-	// Retrieve received data from DATA register. It will automatically clear RXCIF.
+	// Retrieve received data from DATA register. It will automatically clear RXCIF flag.
 	uint8_t u8Data = (USART_RS485)->DATA;
 	
 	// Put new element into FIFO. No check, the buffer should have enough capacity to hold it.
@@ -607,7 +619,7 @@ int main (void)
 	g_u8_relays_state = get_output_channels_state();
 
 	// Start infinite main loop, go to sleep and wait for interruption
-	while( 1 )
+	for(;;)
 	{
 		// Atomic interrupt safe read of global variable storing event flags
 		u16EventFlags = gInterruptEvents;
