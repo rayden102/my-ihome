@@ -26,4 +26,7 @@
 // Enable USARTD0
 #define CONF_BOARD_ENABLE_USARTD0
 
+// MCU Port with output channels
+#define A8CH_OUTPUT_PORT	PORTA
+
 #endif // CONF_BOARD_H
