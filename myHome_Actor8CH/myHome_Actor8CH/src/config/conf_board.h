@@ -15,7 +15,9 @@
 // Wakeup timeout occurs 10 times per second (10Hz/100ms)
 // The prescaler value is 64, thus clock = (2 000 000 / 64) = 31250
 // To achieve 10Hz resolution the period value must be set to 3125
-#define TIMER_HEARTBEAT_PERIOD	(3125)
+#define TIMER_HEARTBEAT_PERIOD		(3125)
+
+#define TIMER_HEARTBEAT_RESOLUTION	(31250)
 
 // Heartbeat timer frequency
 #define A8CH_SYSTEM_TICK_FREQ		(10)
