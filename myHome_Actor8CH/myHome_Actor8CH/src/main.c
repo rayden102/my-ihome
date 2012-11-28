@@ -103,7 +103,6 @@ static inline void rs485_driver_enable(void)
    *********************************************************************** */
 volatile uint8_t g_u8_relays_state = 0;
 
-
 /**
  * \brief Function to set channel state
  *
@@ -450,8 +449,7 @@ static void HandleHeartbeatTimer(void)
 	if (A8CH_DATA_FRAME_SIZE == u8FifoSize)
 	{
 		// Translate received data to myHome Communication Data format
-		myHome_Comm_Data_CopyFrom(&fifo_rs485_receive_buffer_desc,
-								  &g_comm_data_frame_desc);
+		myHome_Comm_Data_CopyFrom(&fifo_rs485_receive_buffer_desc, &g_comm_data_frame_desc);
 			
 		// Check if message is intended for this device
 		// TODO: what if MPCM is ON? is it just a double check?
@@ -523,7 +521,61 @@ static inline uint8_t get_output_channels_state(void)
 	return (PORTA_OUT);
 };	// get_output_channels_state()
 
+#define xmega_usart_baudrate(_usart, _bselValue, _bScaleFactor)				\
+(_usart)->BAUDCTRLA =(uint8_t)_bselValue;									\
+(_usart)->BAUDCTRLB =(_bScaleFactor << USART_BSCALE0_bp)|(_bselValue >> 8)
 
+/********************************************//**
+ *  RS-485 Bus USART initialization
+***********************************************/
+static void usart_rs485Bus_init(void)
+{
+	/* Set USART transmission 9600 baud rate */
+	/* BSCALE = -7		*/
+	/* CLK2X = 0		*/
+	/* BSEL = 1539		*/
+	/* Error = 0,01%	*/
+		
+	/* USART initialization should use the following sequence:
+		1. Set the TxD pin value high, and optionally set the XCK pin low.
+		2. Set the TxD and optionally the XCK pin as output.
+		3. Set the baud rate and frame format.
+		4. Set the mode of operation (enables XCK pin output in synchronous mode).
+		5. Enable the transmitter or the receiver, depending on the usage.
+	For interrupt-driven USART operation, global interrupts should be disabled during the
+	initialization. */	
+	
+	/* Disable global interrupts */
+	cpu_irq_disable();
+	
+	/* PD3 (TXD0) as output - high */
+	/* PD2 (RXD0) as input */
+	ioport_configure_pin(IOPORT_CREATE_PIN(PORTD, 3), IOPORT_DIR_OUTPUT | IOPORT_INIT_HIGH);
+	ioport_configure_pin(IOPORT_CREATE_PIN(PORTD, 2), IOPORT_DIR_INPUT);
+	
+	/* Enable system clock to peripheral */
+	sysclk_enable_module(SYSCLK_PORT_D, SYSCLK_USART0);
+	
+	/* Set the baud rate: use BSCALE and BSEL */
+	xmega_usart_baudrate(USART_RS485, 1539, -7);
+
+	/* Set frame format */
+	usart_format_set(USART_RS485, USART_RS485_CHAR_LENGTH, USART_RS485_PARITY, USART_RS485_STOP_BIT);
+
+	/* Set mode */
+	usart_set_mode(USART_RS485, USART_CMODE_ASYNCHRONOUS_gc);
+	
+	/* Set interrupts level */
+	usart_set_rx_interrupt_level(USART_RS485, USART_INT_LVL_LO);
+	usart_set_tx_interrupt_level(USART_RS485, USART_INT_LVL_LO);
+	
+	/* Enable transmitter and receiver */
+	usart_tx_enable(USART_RS485);
+	usart_rx_enable(USART_RS485);
+	
+	/* Enable interrupts */
+	cpu_irq_enable();
+}
 
 /* *********************************************************************** */
 /* *********************** MAIN LOOP STARTS HERE ************************* */
@@ -541,29 +593,26 @@ int main (void)
 	// System clock initialization
 	sysclk_init();
 	// Sleep Manager initialization
-	sleepmgr_init();
-
-	// Enable interrupts
-	cpu_irq_enable();
+	sleepmgr_init();	
 	
 	/* *********************************************************************** */
 	/* ************************* TIMER CONFIGURATION ************************* */
 	/* *********************************************************************** */
 	
 	// Unmask clock
-	tc_enable( &TIMER_HEARTBEAT);
+	tc_enable(&TIMER_HEARTBEAT);
 	// Configure interrupts callback functions for system heartbeat timer.
-	tc_set_overflow_interrupt_callback( &TIMER_HEARTBEAT,
-										heartbeat_ovf_irq_callback );
+	tc_set_overflow_interrupt_callback(&TIMER_HEARTBEAT, heartbeat_ovf_irq_callback);
 	
 	// Configure TC in normal mode and configure period
-	tc_set_wgm( &TIMER_HEARTBEAT, TC_WG_NORMAL );
-	tc_write_period( &TIMER_HEARTBEAT, TIMER_HEARTBEAT_PERIOD );
+	tc_set_wgm(&TIMER_HEARTBEAT, TC_WG_NORMAL);
+	tc_set_direction(&TIMER_HEARTBEAT, TC_UP);
+	tc_write_period(&TIMER_HEARTBEAT, TIMER_HEARTBEAT_PERIOD);
 
 	// Enable TC overflow interrupt
-	tc_set_overflow_interrupt_level( &TIMER_HEARTBEAT, TC_INT_LVL_LO );
-	// Run system heartbeat timer at 10Hz resolution
-	tc_set_resolution( &TIMER_HEARTBEAT, TIMER_HEARTBEAT_PERIOD );
+	tc_set_overflow_interrupt_level(&TIMER_HEARTBEAT, TC_INT_LVL_LO);
+	// Configure timer clock and prescaler
+	tc_set_resolution(&TIMER_HEARTBEAT, TIMER_HEARTBEAT_RESOLUTION);
 
 	/* *********************************************************************** */
 	/* ********************** RS-485 FIFO CONFIGURATION ********************** */
@@ -590,18 +639,8 @@ int main (void)
 	/* *********************************************************************** */
 	
 	// *** Initialize USART ****
-	// USART options
 	// TODO: if MPCM then use suitable configuration
-	static usart_rs232_options_t USART_RS485_OPTIONS =
-	{
-		.baudrate	= USART_RS485_BAUDRATE,
-		.charlength = USART_RS485_CHAR_LENGTH,
-		.paritytype = USART_RS485_PARITY,
-		.stopbits	= USART_RS485_STOP_BIT
-	};
-	
-	// Initialize USART driver in RS232 mode
-	usart_init_rs232(USART_RS485, &USART_RS485_OPTIONS);
+	usart_rs485Bus_init();
 
 	// *** Initialize RS-485 transceiver ***
 	// Initially go to LOW and this will enable receiver output
@@ -610,13 +649,16 @@ int main (void)
 	/* *********************************************************************** */
 	/* ********************** OUTPUT CONFIGURATION *************************** */
 	/* *********************************************************************** */
-	// Configure all PORTA pins as outputs
-	ioport_configure_group(IOPORT_PORTA, 0b11111111, IOPORT_DIR_OUTPUT);
+	// Configure every PORTA pin as output
+	ioport_configure_group(IOPORT_PORTA, 0xFF, IOPORT_DIR_OUTPUT);
 
 	// TODO: retrieve channels state from NVM and make a set?
 
 	// Read current status of GPIOs which control relays PA[0..7]
 	g_u8_relays_state = get_output_channels_state();
+
+	// Enable interrupts
+	cpu_irq_enable();
 
 	// Start infinite main loop, go to sleep and wait for interruption
 	for(;;)
@@ -654,6 +696,6 @@ int main (void)
 		};
 		
 		cpu_irq_enable();
-	};	// main while(1) loop
+	};	// main loop
 
 }	// main()
