@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Kit projectId="1" projectName="default" Technology="QTouch" DeviceVariant="44" QTouchDesignVersion="1.0" QTouchLibraryVersion="5.0.1082">
+  <KitLayout>
+    <KitSize width="400" height="250" kitPanelThickness="0.1" kitImage="" />
+    <Button id="0" name="Button0" width="11" height="11" positionX="10" positionY="10" fromChannel="0" toChannel="0" type="0" />
+    <Button id="1" name="Button1" width="11" height="11" positionX="31" positionY="10" fromChannel="1" toChannel="1" type="0" />
+    <Button id="2" name="Button2" width="11" height="11" positionX="52" positionY="10" fromChannel="2" toChannel="2" type="0" />
+    <Button id="3" name="Button3" width="11" height="11" positionX="73" positionY="10" fromChannel="3" toChannel="3" type="0" />
+    <Button id="4" name="Button4" width="11" height="11" positionX="94" positionY="10" fromChannel="4" toChannel="4" type="0" />
+    <Button id="5" name="Button5" width="11" height="11" positionX="115" positionY="10" fromChannel="5" toChannel="5" type="0" />
+  </KitLayout>
+  <GlobalConfiguration recalibrationThreshold="1" detectIntegrationLimit="2" driftHoldTime="20" sensorMaximumDuration="0" negativeDriftRate="20" positiveDriftRate="5" libraryTimingSetting="0" measurementPeriod="50" positiveRecalibrationDelay="0" ticksPerMilliSec="500" />
+  <OtherOprtions delayCycle="1" powerOptimization="0" />
+  <SensorConfigurations autoAssign="true">
+    <SensorConfiguration sensorType="1" fromChannel="0" toChannel="0" aksGroup="0" detectThreshold="10" detectHysteresis="3" positiveRecalibrationFlag="0" />
+    <SensorConfiguration sensorType="1" fromChannel="1" toChannel="1" aksGroup="0" detectThreshold="10" detectHysteresis="3" positiveRecalibrationFlag="0" />
+    <SensorConfiguration sensorType="1" fromChannel="2" toChannel="2" aksGroup="0" detectThreshold="10" detectHysteresis="3" positiveRecalibrationFlag="0" />
+    <SensorConfiguration sensorType="1" fromChannel="3" toChannel="3" aksGroup="0" detectThreshold="10" detectHysteresis="3" positiveRecalibrationFlag="0" />
+    <SensorConfiguration sensorType="1" fromChannel="4" toChannel="4" aksGroup="0" detectThreshold="10" detectHysteresis="3" positiveRecalibrationFlag="0" />
+    <SensorConfiguration sensorType="1" fromChannel="5" toChannel="5" aksGroup="0" detectThreshold="10" detectHysteresis="3" positiveRecalibrationFlag="0" />
+  </SensorConfigurations>
+  <PinConfiguration useDefaultPinConfiguration="False">
+    <PinConfig>
+      <PortPair SNS="A" SNSK="A">
+        <Sensor Name="Button0" Type="Button" Index="0" NumberOfChannels="1">
+          <Port SNSPortPin="PA0" SNSKPortPin="PA1" />
+        </Sensor>
+        <Sensor Name="Button1" Type="Button" Index="1" NumberOfChannels="1">
+          <Port SNSPortPin="PA2" SNSKPortPin="PA3" />
+        </Sensor>
+        <Sensor Name="Button2" Type="Button" Index="2" NumberOfChannels="1">
+          <Port SNSPortPin="PA4" SNSKPortPin="PA5" />
+        </Sensor>
+      </PortPair>
+      <PortPair SNS="C" SNSK="C">
+        <Sensor Name="Button3" Type="Button" Index="3" NumberOfChannels="1">
+          <Port SNSPortPin="PC2" SNSKPortPin="PC3" />
+        </Sensor>
+        <Sensor Name="Button4" Type="Button" Index="4" NumberOfChannels="1">
+          <Port SNSPortPin="PC4" SNSKPortPin="PC5" />
+        </Sensor>
+        <Sensor Name="Button5" Type="Button" Index="5" NumberOfChannels="1">
+          <Port SNSPortPin="PC6" SNSKPortPin="PC7" />
+        </Sensor>
+      </PortPair>
+    </PinConfig>
+  </PinConfiguration>
+</Kit>

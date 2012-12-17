@@ -1,0 +1,24 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Atmel Studio Solution File, Format Version 11.00
+Project("{54F91283-7BC4-4236-8FF9-10F437C3AD48}") = "QT_LightingWallSensor_v1", "QT_LightingWallSensor_v1\QT_LightingWallSensor_v1.cproj", "{48A6A9CC-E025-441D-95F9-C0B547FF60A7}"
+EndProject
+Global
+	GlobalSection(SubversionScc) = preSolution
+		Svn-Managed = True
+		Manager = AnkhSVN - Subversion Support for Visual Studio
+	EndGlobalSection
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|AVR = Debug|AVR
+		Release|AVR = Release|AVR
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{48A6A9CC-E025-441D-95F9-C0B547FF60A7}.Debug|AVR.ActiveCfg = Debug|AVR
+		{48A6A9CC-E025-441D-95F9-C0B547FF60A7}.Debug|AVR.Build.0 = Debug|AVR
+		{48A6A9CC-E025-441D-95F9-C0B547FF60A7}.Release|AVR.ActiveCfg = Release|AVR
+		{48A6A9CC-E025-441D-95F9-C0B547FF60A7}.Release|AVR.Build.0 = Release|AVR
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
