@@ -23,111 +23,111 @@
     <AsfVersion>3.5.0</AsfVersion>
     <AsfFrameworkConfig>
       <framework-data>
-  <options>
-    <option id="libavrxmega2g1-8qt-k-0rs.a" value="Add" config="" content-id="Atmel.QTouch" />
-    <option id="qtlib.generic.tmx.qt.avrxmega" value="Add" config="" content-id="Atmel.QTouch" />
-  </options>
-  <configurations />
-  <files>
-    <file path="src/QTouch/libavrxmega2g1-8qt-k-0rs.a" framework="" version="" source="Generic_QTouch_Libraries\AVR_Tiny_Mega_XMega\QTouch\library_files\libavrxmega2g1-8qt-k-0rs.a" changed="False" content-id="Atmel.QTouch" />
-    <file path="src/QTouch/eeprom_access.c" framework="" version="" source="Generic_QTouch_Libraries\debug\eeprom_access.c" changed="False" content-id="Atmel.QTouch" />
-    <file path="src/QTouch/BitBangSPI_Master.c" framework="" version="" source="Generic_QTouch_Libraries\AVR_Tiny_Mega_XMega\QTouch\example_projects\xmega_gnu_qt_example\BitBangSPI_Master.c" changed="False" content-id="Atmel.QTouch" />
-    <file path="src/QTouch/QDebug.c" framework="" version="" source="Generic_QTouch_Libraries\debug\QDebug.c" changed="False" content-id="Atmel.QTouch" />
-    <file path="src/QTouch/QDebugTransport.c" framework="" version="" source="Generic_QTouch_Libraries\debug\QDebugTransport.c" changed="False" content-id="Atmel.QTouch" />
-    <file path="src/QTouch/qt_asm_xmega.s" framework="" version="" source="Generic_QTouch_Libraries\AVR_Tiny_Mega_XMega\QTouch\common_files\qt_asm_xmega.s" changed="False" content-id="Atmel.QTouch" />
-    <file path="src/QTouch/license.txt" framework="" version="" source="license.txt" changed="False" content-id="Atmel.QTouch" />
-    <file path="src/QTouch/QDebug.h" framework="" version="" source="Generic_QTouch_Libraries\debug\QDebug.h" changed="False" content-id="Atmel.QTouch" />
-    <file path="src/QTouch/BitBangSPI_Master.h" framework="" version="" source="Generic_QTouch_Libraries\AVR_Tiny_Mega_XMega\QTouch\example_projects\xmega_gnu_qt_example\BitBangSPI_Master.h" changed="False" content-id="Atmel.QTouch" />
-    <file path="src/QTouch/touch_api.h" framework="" version="" source="Generic_QTouch_Libraries\include\touch_api.h" changed="False" content-id="Atmel.QTouch" />
-    <file path="src/QTouch/QDebugTransport.h" framework="" version="" source="Generic_QTouch_Libraries\debug\QDebugTransport.h" changed="False" content-id="Atmel.QTouch" />
-    <file path="src/QTouch/qt_asm_avr.h" framework="" version="" source="Generic_QTouch_Libraries\AVR_Tiny_Mega_XMega\QTouch\common_files\qt_asm_avr.h" changed="False" content-id="Atmel.QTouch" />
-    <file path="src/QTouch/QDebugSettings.h" framework="" version="" source="Generic_QTouch_Libraries\AVR_Tiny_Mega_XMega\QTouch\example_projects\xmega_gnu_qt_example\QDebugSettings.h" changed="False" content-id="Atmel.QTouch" />
-    <file path="src/QTouch/eeprom_access.h" framework="" version="" source="Generic_QTouch_Libraries\debug\eeprom_access.h" changed="False" content-id="Atmel.QTouch" />
-    <file path="src/QTouch/init_mcu_atxmega16a4.c" framework="" version="" source="Generic_QTouch_Libraries\templates\init_mcu_atxmega16a4.c" changed="False" content-id="Atmel.QTouch" />
-  </files>
-  <documentation help="" />
-</framework-data>
+        <options>
+          <option id="libavrxmega2g1-8qt-k-0rs.a" value="Add" config="" content-id="Atmel.QTouch" />
+          <option id="qtlib.generic.tmx.qt.avrxmega" value="Add" config="" content-id="Atmel.QTouch" />
+        </options>
+        <configurations />
+        <files>
+          <file path="src/QTouch/libavrxmega2g1-8qt-k-0rs.a" framework="" version="" source="Generic_QTouch_Libraries\AVR_Tiny_Mega_XMega\QTouch\library_files\libavrxmega2g1-8qt-k-0rs.a" changed="False" content-id="Atmel.QTouch" />
+          <file path="src/QTouch/eeprom_access.c" framework="" version="" source="Generic_QTouch_Libraries\debug\eeprom_access.c" changed="False" content-id="Atmel.QTouch" />
+          <file path="src/QTouch/BitBangSPI_Master.c" framework="" version="" source="Generic_QTouch_Libraries\AVR_Tiny_Mega_XMega\QTouch\example_projects\xmega_gnu_qt_example\BitBangSPI_Master.c" changed="False" content-id="Atmel.QTouch" />
+          <file path="src/QTouch/QDebug.c" framework="" version="" source="Generic_QTouch_Libraries\debug\QDebug.c" changed="False" content-id="Atmel.QTouch" />
+          <file path="src/QTouch/QDebugTransport.c" framework="" version="" source="Generic_QTouch_Libraries\debug\QDebugTransport.c" changed="False" content-id="Atmel.QTouch" />
+          <file path="src/QTouch/qt_asm_xmega.s" framework="" version="" source="Generic_QTouch_Libraries\AVR_Tiny_Mega_XMega\QTouch\common_files\qt_asm_xmega.s" changed="False" content-id="Atmel.QTouch" />
+          <file path="src/QTouch/license.txt" framework="" version="" source="license.txt" changed="False" content-id="Atmel.QTouch" />
+          <file path="src/QTouch/QDebug.h" framework="" version="" source="Generic_QTouch_Libraries\debug\QDebug.h" changed="False" content-id="Atmel.QTouch" />
+          <file path="src/QTouch/BitBangSPI_Master.h" framework="" version="" source="Generic_QTouch_Libraries\AVR_Tiny_Mega_XMega\QTouch\example_projects\xmega_gnu_qt_example\BitBangSPI_Master.h" changed="False" content-id="Atmel.QTouch" />
+          <file path="src/QTouch/touch_api.h" framework="" version="" source="Generic_QTouch_Libraries\include\touch_api.h" changed="False" content-id="Atmel.QTouch" />
+          <file path="src/QTouch/QDebugTransport.h" framework="" version="" source="Generic_QTouch_Libraries\debug\QDebugTransport.h" changed="False" content-id="Atmel.QTouch" />
+          <file path="src/QTouch/qt_asm_avr.h" framework="" version="" source="Generic_QTouch_Libraries\AVR_Tiny_Mega_XMega\QTouch\common_files\qt_asm_avr.h" changed="False" content-id="Atmel.QTouch" />
+          <file path="src/QTouch/QDebugSettings.h" framework="" version="" source="Generic_QTouch_Libraries\AVR_Tiny_Mega_XMega\QTouch\example_projects\xmega_gnu_qt_example\QDebugSettings.h" changed="False" content-id="Atmel.QTouch" />
+          <file path="src/QTouch/eeprom_access.h" framework="" version="" source="Generic_QTouch_Libraries\debug\eeprom_access.h" changed="False" content-id="Atmel.QTouch" />
+          <file path="src/QTouch/init_mcu_atxmega16a4.c" framework="" version="" source="Generic_QTouch_Libraries\templates\init_mcu_atxmega16a4.c" changed="False" content-id="Atmel.QTouch" />
+        </files>
+        <documentation help="" />
+      </framework-data>
     </AsfFrameworkConfig>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
     <ToolchainSettings>
       <AvrGcc>
-  <avrgcc.common.outputfiles.hex>True</avrgcc.common.outputfiles.hex>
-  <avrgcc.common.outputfiles.lss>True</avrgcc.common.outputfiles.lss>
-  <avrgcc.common.outputfiles.eep>True</avrgcc.common.outputfiles.eep>
-  <avrgcc.common.outputfiles.srec>True</avrgcc.common.outputfiles.srec>
-  <avrgcc.compiler.general.ChangeDefaultCharTypeUnsigned>True</avrgcc.compiler.general.ChangeDefaultCharTypeUnsigned>
-  <avrgcc.compiler.general.ChangeDefaultBitFieldUnsigned>True</avrgcc.compiler.general.ChangeDefaultBitFieldUnsigned>
-  <avrgcc.compiler.directories.IncludePaths>
-    <ListValues>
-      <Value>../src/QTouch</Value>
-      <Value>..</Value>
-    </ListValues>
-  </avrgcc.compiler.directories.IncludePaths>
-  <avrgcc.compiler.optimization.level>Optimize for size (-Os)</avrgcc.compiler.optimization.level>
-  <avrgcc.compiler.optimization.PackStructureMembers>True</avrgcc.compiler.optimization.PackStructureMembers>
-  <avrgcc.compiler.optimization.AllocateBytesNeededForEnum>True</avrgcc.compiler.optimization.AllocateBytesNeededForEnum>
-  <avrgcc.compiler.warnings.AllWarnings>True</avrgcc.compiler.warnings.AllWarnings>
-  <avrgcc.linker.libraries.Libraries>
-    <ListValues>
-      <Value>m</Value>
-      <Value>avrxmega2g1-8qt-k-0rs</Value>
-    </ListValues>
-  </avrgcc.linker.libraries.Libraries>
-  <avrgcc.linker.libraries.LibrarySearchPaths>
-    <ListValues>
-      <Value>../src/QTouch</Value>
-    </ListValues>
-  </avrgcc.linker.libraries.LibrarySearchPaths>
-  <avrgcc.assembler.general.IncludePaths>
-    <ListValues>
-      <Value>../src/QTouch</Value>
-      <Value>..</Value>
-    </ListValues>
-  </avrgcc.assembler.general.IncludePaths>
-</AvrGcc>
+        <avrgcc.common.outputfiles.hex>True</avrgcc.common.outputfiles.hex>
+        <avrgcc.common.outputfiles.lss>True</avrgcc.common.outputfiles.lss>
+        <avrgcc.common.outputfiles.eep>True</avrgcc.common.outputfiles.eep>
+        <avrgcc.common.outputfiles.srec>True</avrgcc.common.outputfiles.srec>
+        <avrgcc.compiler.general.ChangeDefaultCharTypeUnsigned>True</avrgcc.compiler.general.ChangeDefaultCharTypeUnsigned>
+        <avrgcc.compiler.general.ChangeDefaultBitFieldUnsigned>True</avrgcc.compiler.general.ChangeDefaultBitFieldUnsigned>
+        <avrgcc.compiler.directories.IncludePaths>
+          <ListValues>
+            <Value>../src/QTouch</Value>
+            <Value>..</Value>
+          </ListValues>
+        </avrgcc.compiler.directories.IncludePaths>
+        <avrgcc.compiler.optimization.level>Optimize for size (-Os)</avrgcc.compiler.optimization.level>
+        <avrgcc.compiler.optimization.PackStructureMembers>True</avrgcc.compiler.optimization.PackStructureMembers>
+        <avrgcc.compiler.optimization.AllocateBytesNeededForEnum>True</avrgcc.compiler.optimization.AllocateBytesNeededForEnum>
+        <avrgcc.compiler.warnings.AllWarnings>True</avrgcc.compiler.warnings.AllWarnings>
+        <avrgcc.linker.libraries.Libraries>
+          <ListValues>
+            <Value>m</Value>
+            <Value>avrxmega2g1-8qt-k-0rs</Value>
+          </ListValues>
+        </avrgcc.linker.libraries.Libraries>
+        <avrgcc.linker.libraries.LibrarySearchPaths>
+          <ListValues>
+            <Value>../src/QTouch</Value>
+          </ListValues>
+        </avrgcc.linker.libraries.LibrarySearchPaths>
+        <avrgcc.assembler.general.IncludePaths>
+          <ListValues>
+            <Value>../src/QTouch</Value>
+            <Value>..</Value>
+          </ListValues>
+        </avrgcc.assembler.general.IncludePaths>
+      </AvrGcc>
     </ToolchainSettings>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
     <ToolchainSettings>
       <AvrGcc>
-  <avrgcc.common.outputfiles.hex>True</avrgcc.common.outputfiles.hex>
-  <avrgcc.common.outputfiles.lss>True</avrgcc.common.outputfiles.lss>
-  <avrgcc.common.outputfiles.eep>True</avrgcc.common.outputfiles.eep>
-  <avrgcc.common.outputfiles.srec>True</avrgcc.common.outputfiles.srec>
-  <avrgcc.compiler.general.ChangeDefaultCharTypeUnsigned>True</avrgcc.compiler.general.ChangeDefaultCharTypeUnsigned>
-  <avrgcc.compiler.general.ChangeDefaultBitFieldUnsigned>True</avrgcc.compiler.general.ChangeDefaultBitFieldUnsigned>
-  <avrgcc.compiler.directories.IncludePaths>
-    <ListValues>
-      <Value>../src/QTouch</Value>
-      <Value>..</Value>
-    </ListValues>
-  </avrgcc.compiler.directories.IncludePaths>
-  <avrgcc.compiler.optimization.level>Optimize for size (-Os)</avrgcc.compiler.optimization.level>
-  <avrgcc.compiler.optimization.PackStructureMembers>True</avrgcc.compiler.optimization.PackStructureMembers>
-  <avrgcc.compiler.optimization.AllocateBytesNeededForEnum>True</avrgcc.compiler.optimization.AllocateBytesNeededForEnum>
-  <avrgcc.compiler.optimization.DebugLevel>Default (-g2)</avrgcc.compiler.optimization.DebugLevel>
-  <avrgcc.compiler.warnings.AllWarnings>True</avrgcc.compiler.warnings.AllWarnings>
-  <avrgcc.compiler.warnings.WarningsAsErrors>True</avrgcc.compiler.warnings.WarningsAsErrors>
-  <avrgcc.linker.libraries.Libraries>
-    <ListValues>
-      <Value>m</Value>
-      <Value>avrxmega2g1-8qt-k-0rs</Value>
-    </ListValues>
-  </avrgcc.linker.libraries.Libraries>
-  <avrgcc.linker.libraries.LibrarySearchPaths>
-    <ListValues>
-      <Value>../src/QTouch</Value>
-    </ListValues>
-  </avrgcc.linker.libraries.LibrarySearchPaths>
-  <avrgcc.assembler.general.IncludePaths>
-    <ListValues>
-      <Value>../src/QTouch</Value>
-      <Value>..</Value>
-    </ListValues>
-  </avrgcc.assembler.general.IncludePaths>
-  <avrgcc.assembler.debugging.DebugLevel>Default (-Wa,-g)</avrgcc.assembler.debugging.DebugLevel>
-</AvrGcc>
+        <avrgcc.common.outputfiles.hex>True</avrgcc.common.outputfiles.hex>
+        <avrgcc.common.outputfiles.lss>True</avrgcc.common.outputfiles.lss>
+        <avrgcc.common.outputfiles.eep>True</avrgcc.common.outputfiles.eep>
+        <avrgcc.common.outputfiles.srec>True</avrgcc.common.outputfiles.srec>
+        <avrgcc.compiler.general.ChangeDefaultCharTypeUnsigned>True</avrgcc.compiler.general.ChangeDefaultCharTypeUnsigned>
+        <avrgcc.compiler.general.ChangeDefaultBitFieldUnsigned>True</avrgcc.compiler.general.ChangeDefaultBitFieldUnsigned>
+        <avrgcc.compiler.directories.IncludePaths>
+          <ListValues>
+            <Value>../src/QTouch</Value>
+            <Value>..</Value>
+          </ListValues>
+        </avrgcc.compiler.directories.IncludePaths>
+        <avrgcc.compiler.optimization.level>Optimize for size (-Os)</avrgcc.compiler.optimization.level>
+        <avrgcc.compiler.optimization.PackStructureMembers>True</avrgcc.compiler.optimization.PackStructureMembers>
+        <avrgcc.compiler.optimization.AllocateBytesNeededForEnum>True</avrgcc.compiler.optimization.AllocateBytesNeededForEnum>
+        <avrgcc.compiler.optimization.DebugLevel>Default (-g2)</avrgcc.compiler.optimization.DebugLevel>
+        <avrgcc.compiler.warnings.AllWarnings>True</avrgcc.compiler.warnings.AllWarnings>
+        <avrgcc.compiler.warnings.WarningsAsErrors>True</avrgcc.compiler.warnings.WarningsAsErrors>
+        <avrgcc.linker.libraries.Libraries>
+          <ListValues>
+            <Value>m</Value>
+            <Value>avrxmega2g1-8qt-k-0rs</Value>
+          </ListValues>
+        </avrgcc.linker.libraries.Libraries>
+        <avrgcc.linker.libraries.LibrarySearchPaths>
+          <ListValues>
+            <Value>../src/QTouch</Value>
+          </ListValues>
+        </avrgcc.linker.libraries.LibrarySearchPaths>
+        <avrgcc.assembler.general.IncludePaths>
+          <ListValues>
+            <Value>../src/QTouch</Value>
+            <Value>..</Value>
+          </ListValues>
+        </avrgcc.assembler.general.IncludePaths>
+        <avrgcc.assembler.debugging.DebugLevel>Default (-Wa,-g)</avrgcc.assembler.debugging.DebugLevel>
+      </AvrGcc>
     </ToolchainSettings>
   </PropertyGroup>
   <ItemGroup>
@@ -143,6 +143,9 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="board_config_TouchPanel.h">
+      <SubType>compile</SubType>
+    </Compile>
     <Compile Include="main.c">
       <SubType>compile</SubType>
     </Compile>
@@ -150,6 +153,9 @@
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="src\QTouch\init_mcu_atxmega16a4.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="xmega_usart.h">
       <SubType>compile</SubType>
     </Compile>
     <None Include="src\QTouch\eeprom_access.h">

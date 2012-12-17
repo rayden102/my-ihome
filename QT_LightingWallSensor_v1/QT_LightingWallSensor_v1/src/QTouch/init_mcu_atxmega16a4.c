@@ -43,6 +43,9 @@
 #include <avr/interrupt.h>
 #include "touch.h"
 #include "touch_api.h"
+
+#include "xmega_usart.h"
+#include "board_config_TouchPanel.h"
 /*----------------------------------------------------------------------------
                             manifest constants
 ----------------------------------------------------------------------------*/
@@ -119,7 +122,7 @@ void set_timer_period(uint16_t qt_measurement_period_msec)
 /*============================================================================
 Name    :   CCP write helper function written in assembly.
 ------------------------------------------------------------------------------
-Purpose :   This function is written in assembly because of the time critial
+Purpose :   This function is written in assembly because of the time critical
 operation of writing to the registers for xmega.
 Input   :   address - A pointer to the address to write to.
 value   - The value to put in to the register.
@@ -149,7 +152,7 @@ Purpose :   initialize host app, pins, watchdog, etc
 void init_system( void )
 {
     uint8_t PSconfig;
-   uint8_t clkCtrl;
+    uint8_t clkCtrl;
 
    /*  Configure Oscillator and Clock source   */
 
@@ -169,6 +172,108 @@ void init_system( void )
    /*  PORTCFG_CLKEVOUT = 0x03;    */
    /*  PORTE_DIRSET = 0x80;    */
 
+	/************************************************************************/
+	/* Self address configuration with dip switch on PORTB[0..3]            */
+	/************************************************************************/
+
+	/* Configure PortB as inputs with internal pull-ups.
+	   The internal pull-up will drive the line high	*/
+	PORTB.DIRCLR = (PIN0_bm | PIN1_bm | PIN2_bm | PIN3_bm);	// all 4 pins of port B	as inputs
+	
+	/* Writing any of the PINnCTRL registers will update only the PINnCTRL
+	registers matching the mask in the MPCMASK register	for that port. */
+	PORTCFG.MPCMASK = (PIN0_bm | PIN1_bm | PIN2_bm | PIN3_bm);	// all 4 pins of port B
+	PORTB.PIN0CTRL = (PORTB.PIN0CTRL & ~PORT_OPC_gm) | PORT_OPC_PULLUP_gc;	// pull-ups on
+	
+	/************************************************************************/
+	/* RS-485 Transceiver configuration                                     */
+	/************************************************************************/
+	
+	/* +----------------------------------------------+
+	   | RS-485 control pin |        Function		  |
+	   |--------------------|-------------------------|
+	   | LOW				| Receiver output enabled |
+	   |--------------------|-------------------------|
+	   | HIGH				| Driver output enabled   |
+	   +----------------------------------------------+ */
+	
+	/* Initially go to listening mode: enable receiver */
+	RS485_DRIVER_PORT.DIRSET = RS584_DRIVER_CTRL_bm;	// pin as output
+	RS485_DRIVER_PORT.OUTCLR = RS584_DRIVER_CTRL_bm;	// drive pin low
+	
+	/* USARTD0 used for RS-485 transmission */
+	/* Set USART transmission 19200 baud rate @32MHz CPU */
+	/* BSCALE = -7		*/
+	/* CLK2X = 0		*/
+	/* BSEL = 13205		*/
+	/* Error = 0,00%	*/
+		
+	/* USART initialization should use the following sequence:
+		1. Set the TxD pin value high, and optionally set the XCK pin low.
+		2. Set the TxD and optionally the XCK pin as output.
+		3. Set the baud rate and frame format.
+		4. Set the mode of operation (enables XCK pin output in synchronous mode).
+		5. Enable the transmitter or the receiver, depending on the usage.
+	For interrupt-driven USART operation, global interrupts should be disabled during the
+	initialization. */	
+		
+	/* PD3 (TXD) as output - high */
+	PORTD.DIRSET = PIN3_bm;
+	PORTD.OUTSET = PIN3_bm;
+	
+	/* PD2 (RXD) as input */
+	PORTD.DIRCLR = PIN2_bm;
+	
+	/* Enable system clock to peripheral */
+	// Should be enabled after restart - USARTD0
+	PR.PRPD &= ~PR_USART0_bm;
+	
+	/* Set the baud rate: use BSCALE and BSEL */
+	xmega_usart_baudrate(USART_RS485, USART_RS485_BSEL_19200, USART_RS485_BSCALE_19200);	// 19200bps
+	
+	/* Set frame format */
+	xmega_usart_format_set(USART_RS485, USART_RS485_CHAR_SIZE, USART_RS485_PARITY, USART_RS485_STOP_BIT);
+
+	/* Set communication mode */
+	xmega_usart_set_mode(USART_RS485, USART_RS485_CMODE);
+	
+	/* Set interrupts level */
+	xmega_usart_set_rx_interrupt_level(USART_RS485, USART_RXCINTLVL_LO_gc);
+	xmega_usart_set_tx_interrupt_level(USART_RS485, USART_TXCINTLVL_LO_gc);
+	
+	/* Enable transmitter and receiver */
+	xmega_usart_tx_enable(USART_RS485);
+	xmega_usart_rx_enable(USART_RS485);
+
+	/* USARTE0 used for terminal */
+		
+	/* PE3 (TXD) as output - high */
+	PORTE.DIRSET = PIN3_bm;
+	PORTE.OUTSET = PIN3_bm;
+	
+	/* PE2 (RXD) as input */
+	PORTE.DIRCLR = PIN2_bm;
+	
+	/* Enable system clock to peripheral */
+	// Should be enabled after restart - USARTD0
+	PR.PRPE &= ~PR_USART0_bm;
+	
+	/* Set the baud rate: use BSCALE and BSEL */
+	xmega_usart_baudrate(USART_TERMINAL, USART_TERMINAL_BSEL_19200, USART_TERMINAL_BSCALE_19200);	// 19200bps
+	
+	/* Set frame format */
+	xmega_usart_format_set(USART_TERMINAL, USART_TERMINAL_CHAR_SIZE, USART_TERMINAL_PARITY, USART_TERMINAL_STOP_BIT);
+
+	/* Set communication mode */
+	xmega_usart_set_mode(USART_TERMINAL, USART_TERMINAL_CMODE);
+	
+	/* Set interrupts level */
+	xmega_usart_set_rx_interrupt_level(USART_TERMINAL, USART_RXCINTLVL_LO_gc);
+	xmega_usart_set_tx_interrupt_level(USART_TERMINAL, USART_TXCINTLVL_LO_gc);
+	
+	/* Enable transmitter and receiver */
+	xmega_usart_tx_enable(USART_TERMINAL);
+	xmega_usart_rx_enable(USART_TERMINAL);
 }
 
 ISR(TCC0_CCA_vect)

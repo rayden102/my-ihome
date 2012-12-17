@@ -46,6 +46,10 @@
 
 #include "touch_api.h"
 #include "touch.h"
+
+// Debug
+#include <stdio.h>
+
 /*----------------------------------------------------------------------------
                             manifest constants
 ----------------------------------------------------------------------------*/
@@ -98,6 +102,27 @@ volatile uint8_t time_to_measure_touch = 0u;
 /* current time, set by timer ISR */
 volatile uint16_t current_time_ms_touch = 0u;
 
+/* STDIO */
+static int usart_putchar(char c, FILE *stream);
+
+static FILE mystdout = FDEV_SETUP_STREAM(usart_putchar, NULL, _FDEV_SETUP_WRITE);
+
+static int usart_putchar(char a_inChar, FILE *stream)
+{
+	if (a_inChar == '\n')
+	{
+		usart_putchar('\r', stream);
+	}
+	
+	// Wait for the transmit buffer to be empty
+	while ( !( USARTE0_STATUS & USART_DREIF_bm) );
+	
+	// Put our character into the transmit buffer
+	USARTE0_DATA = a_inChar;
+	
+	return 0;
+}
+
 /*============================================================================
 Name    :   main
 ------------------------------------------------------------------------------
@@ -119,6 +144,13 @@ int main( void )
 	/* Initialize Touch sensors */
 	touch_init();
 
+	/* Redirect stream to standard output */
+	stdout = &mystdout;
+
+	/* Send welcome message */
+	printf("Lightning Wall Sensor\n");
+
+	sei();
 
     /* loop forever */
     for( ; ; )
