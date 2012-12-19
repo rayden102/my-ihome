@@ -46,6 +46,7 @@
 
 #include "xmega_usart.h"
 #include "board_config_TouchPanel.h"
+
 /*----------------------------------------------------------------------------
                             manifest constants
 ----------------------------------------------------------------------------*/
@@ -96,14 +97,16 @@ Purpose :   configure timer ISR to fire regularly
 
 void init_timer_isr( void )
 {
-    /*  Set timer period    */
+	/*  Set timer period    */
    TCC0.PER = TICKS_PER_MS * qt_measurement_period_msec;
-   /*  select clock source */
-   TCC0.CTRLA = (TOUCH_DATA_T)4;
-   /*  Set Compare A interrupt to low level   */
-   TCC0.INTCTRLB = 1u;
-   /*  enable low lever interrupts in power manager interrupt control  */
-   PMIC.CTRL |= 1u;
+   // TCC0.CCA = TICKS_PER_MS * qt_measurement_period_msec;
+   
+   /*  Select clock source as peripheral clock/4. 8Mhz/8 = 1MHz */
+   TCC0.CTRLA = TC_CLKSEL_DIV8_gc;
+   
+   /*  Set Compare match A interrupt to low level   */
+   TCC0.INTCTRLB = TC_CCAINTLVL_MED_gc;
+   // TCC0.CTRLB = TC0_CCAEN_bm | TC_WGMODE_NORMAL_gc;   
 }
 /*============================================================================
 Name    :   set_timer_period
@@ -119,29 +122,71 @@ void set_timer_period(uint16_t qt_measurement_period_msec)
   TCC0.PER = TICKS_PER_MS * qt_measurement_period_msec;
 }
 
-/*============================================================================
-Name    :   CCP write helper function written in assembly.
-------------------------------------------------------------------------------
-Purpose :   This function is written in assembly because of the time critical
-operation of writing to the registers for xmega.
-Input   :   address - A pointer to the address to write to.
-value   - The value to put in to the register.
-============================================================================*/
+/*! \brief This macro will protect the following code from interrupts. */
+#define AVR_ENTER_CRITICAL_REGION( ) uint8_t volatile saved_sreg = SREG; \
+                                     cli();
+
+/*! \brief This macro must always be used in conjunction with AVR_ENTER_CRITICAL_REGION
+ *        so the interrupts are enabled again.
+ */
+#define AVR_LEAVE_CRITICAL_REGION( ) SREG = saved_sreg;
+
+/*! \brief CCP write helper function written in assembly.
+ *
+ *  This function is written in assembly because of the time critical
+ *  operation of writing to the registers.
+ *
+ *  \param address A pointer to the address to write to.
+ *  \param value   The value to put in to the register.
+ */
 void CCPWrite( volatile uint8_t * address, uint8_t value )
 {
-   volatile uint8_t * tmpAddr = address;
+#ifdef __ICCAVR__
+
+	// Store global interrupt setting in scratch register and disable interrupts.
+        asm("in  R1, 0x3F \n"
+	    "cli"
+	    );
+
+	// Move destination address pointer to Z pointer registers.
+	asm("movw r30, r16");
 #ifdef RAMPZ
-   RAMPZ = 0;
+	asm("ldi  R16, 0 \n"
+            "out  0x3B, R16"
+	    );
+
 #endif
-   asm volatile(
-                "movw r30,  %0"	"\n\t"
-                "ldi  r16,  %2"	"\n\t"
-                "out   %3, r16"	"\n\t"
-                "st     Z,  %1"
-                :
-                : "r" (tmpAddr), "r" (value), "M" (CCP_IOREG_gc), "m" (CCP)
-                : "r16", "r30", "r31"
-               );
+	asm("ldi  r16,  0xD8 \n"
+	    "out  0x34, r16  \n"
+#if (__MEMORY_MODEL__ == 1)
+	    "st     Z,  r17  \n");
+#elif (__MEMORY_MODEL__ == 2)
+	    "st     Z,  r18  \n");
+#else /* (__MEMORY_MODEL__ == 3) || (__MEMORY_MODEL__ == 5) */
+	    "st     Z,  r19  \n");
+#endif /* __MEMORY_MODEL__ */
+
+	// Restore global interrupt setting from scratch register.
+        asm("out  0x3F, R1");
+
+#elif defined __GNUC__
+	AVR_ENTER_CRITICAL_REGION( );
+	volatile uint8_t * tmpAddr = address;
+#ifdef RAMPZ
+	RAMPZ = 0;
+#endif
+	asm volatile(
+		"movw r30,  %0"	      "\n\t"
+		"ldi  r16,  %2"	      "\n\t"
+		"out   %3, r16"	      "\n\t"
+		"st     Z,  %1"       "\n\t"
+		:
+		: "r" (tmpAddr), "r" (value), "M" (CCP_IOREG_gc), "i" (&CCP)
+		: "r16", "r30", "r31"
+		);
+
+	AVR_LEAVE_CRITICAL_REGION( );
+#endif
 }
 
 /*============================================================================
@@ -152,25 +197,28 @@ Purpose :   initialize host app, pins, watchdog, etc
 void init_system( void )
 {
     uint8_t PSconfig;
-    uint8_t clkCtrl;
+	uint8_t clkCtrl;
 
-   /*  Configure Oscillator and Clock source   */
-
-   /*  Select Prescaler A divider as 4 and Prescaler B & C divider as (1,1) respectively.  */
-   /*  Overall divide by 4 i.e. A*B*C  */
-   PSconfig = (uint8_t) CLK_PSADIV_4_gc | CLK_PSBCDIV_1_1_gc;
-   /*  Enable internal 32 MHz ring oscillator. */
-   OSC.CTRL |= OSC_RC32MEN_bm;
-   CCPWrite( &CLK.PSCTRL, PSconfig );
-   /*  Wait until oscillator is ready. */
-   while ( ( OSC.STATUS & OSC_RC32MRDY_bm ) == 0 );
+	/*  Configure Oscillator and Clock source   */
+   
+	/*  Enable internal 32 MHz ring oscillator. */
+	OSC.CTRL |= OSC_RC32MEN_bm;
+	
+	/*  Wait until oscillator is ready. */
+	while ((OSC.STATUS & OSC_RC32MRDY_bm) == 0);
+   
+    /*  Select Prescaler A divider as 4 and Prescaler B & C divider as (1,1) respectively.  */
+    /*  Overall divide by 4 i.e. A*B*C  */
+    PSconfig = (uint8_t) CLK_PSADIV_4_gc | CLK_PSBCDIV_1_1_gc;
+    CCPWrite( &CLK.PSCTRL, PSconfig );
+   
    /*  Set the 32 MHz ring oscillator as the main clock source */
    clkCtrl = ( CLK.CTRL & ~CLK_SCLKSEL_gm ) | CLK_SCLKSEL_RC32M_gc;
    CCPWrite( &CLK.CTRL, clkCtrl );
 
    /*  Route clk signal to port pin    */
    /*  PORTCFG_CLKEVOUT = 0x03;    */
-   /*  PORTE_DIRSET = 0x80;    */
+   /*  PORTE_DIRSET = 0x80;    */	
 
 	/************************************************************************/
 	/* Self address configuration with dip switch on PORTB[0..3]            */
@@ -201,12 +249,8 @@ void init_system( void )
 	RS485_DRIVER_PORT.DIRSET = RS584_DRIVER_CTRL_bm;	// pin as output
 	RS485_DRIVER_PORT.OUTCLR = RS584_DRIVER_CTRL_bm;	// drive pin low
 	
-	/* USARTD0 used for RS-485 transmission */
-	/* Set USART transmission 19200 baud rate @32MHz CPU */
-	/* BSCALE = -7		*/
-	/* CLK2X = 0		*/
-	/* BSEL = 13205		*/
-	/* Error = 0,00%	*/
+	/* USARTD0 used for transmission over RS-485 */
+	/* Set USART transmission 19200 baud rate @8MHz CPU */
 		
 	/* USART initialization should use the following sequence:
 		1. Set the TxD pin value high, and optionally set the XCK pin low.
@@ -238,8 +282,8 @@ void init_system( void )
 	xmega_usart_set_mode(USART_RS485, USART_RS485_CMODE);
 	
 	/* Set interrupts level */
-	xmega_usart_set_rx_interrupt_level(USART_RS485, USART_RXCINTLVL_LO_gc);
-	xmega_usart_set_tx_interrupt_level(USART_RS485, USART_TXCINTLVL_LO_gc);
+	// xmega_usart_set_rx_interrupt_level(USART_RS485, USART_RXCINTLVL_LO_gc);
+	// xmega_usart_set_tx_interrupt_level(USART_RS485, USART_TXCINTLVL_LO_gc);
 	
 	/* Enable transmitter and receiver */
 	xmega_usart_tx_enable(USART_RS485);
@@ -268,21 +312,24 @@ void init_system( void )
 	xmega_usart_set_mode(USART_TERMINAL, USART_TERMINAL_CMODE);
 	
 	/* Set interrupts level */
-	xmega_usart_set_rx_interrupt_level(USART_TERMINAL, USART_RXCINTLVL_LO_gc);
-	xmega_usart_set_tx_interrupt_level(USART_TERMINAL, USART_TXCINTLVL_LO_gc);
+	// xmega_usart_set_rx_interrupt_level(USART_TERMINAL, USART_RXCINTLVL_LO_gc);
+	// xmega_usart_set_tx_interrupt_level(USART_TERMINAL, USART_TXCINTLVL_LO_gc);
 	
 	/* Enable transmitter and receiver */
 	xmega_usart_tx_enable(USART_TERMINAL);
 	xmega_usart_rx_enable(USART_TERMINAL);
 }
 
-ISR(TCC0_CCA_vect)
+#include <stdio.h>
+ISR(TCC0_CCA_vect, ISR_BLOCK)
 {
     /*  set flag: it's time to measure touch    */
     time_to_measure_touch = 1u;
 
     /*  update the current time  */
     current_time_ms_touch += qt_measurement_period_msec;
+	
+	// printf ("\n!\n");
 }
 #endif
 
