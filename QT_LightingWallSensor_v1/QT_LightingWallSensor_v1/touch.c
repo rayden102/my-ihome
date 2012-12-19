@@ -42,14 +42,11 @@
                                 include files
 ----------------------------------------------------------------------------*/
 
-
-
-
 #include <avr/io.h>
 #include <avr/interrupt.h>
 
-#define __enable_interrupt()  sei()
-#define __delay_cycles(n)     __builtin_avr_delay_cycles(n)
+/* #define __enable_interrupt()  sei()
+#define __delay_cycles(n)     __builtin_avr_delay_cycles(n) */
 
 /*  now include touch api.h with the localization defined above */
 #include "touch_api.h"
@@ -170,10 +167,7 @@ Notes   :
 
 void touch_init( void )
 {
-
-
-
-	#ifdef QTOUCH_STUDIO_MASKS
+#ifdef QTOUCH_STUDIO_MASKS
 	SNS_array[0][0]= 0x15;
 	SNS_array[0][1]= 0x0;
 	SNS_array[1][0]= 0x54;
@@ -183,15 +177,12 @@ void touch_init( void )
 	SNSK_array[0][1]= 0x0;
 	SNSK_array[1][0]= 0xa8;
 	SNSK_array[1][1]= 0x0;
-	#endif
-
-
-
+#endif
 
     /* Configure the Sensors as keys or Keys With Rotor/Sliders in this function */
     config_sensors();
 
-    /* initialise touch sensing */
+    /* initialize touch sensing */
     qt_init_sensing();
 
     /*  Set the parameters like recalibration threshold, Max_On_Duration etc in this function by the user */
@@ -211,16 +202,13 @@ void touch_init( void )
               qt_filter_callback = 0;
        #endif
 
-
-
-
 #ifdef _DEBUG_INTERFACE_
     /* Initialize debug protocol */
     QDebug_Init();
 #endif
 
     /* enable interrupts */
-    __enable_interrupt();
+//    __enable_interrupt();
 
 
 #ifdef _DEBUG_INTERFACE_
@@ -248,54 +236,52 @@ Input   :   n/a
 Output  :   n/a
 Notes   :
 ============================================================================*/
-
 void touch_measure()
 {
-
 	/*status flags to indicate the re-burst for library*/
     static uint16_t status_flag = 0u;
     static uint16_t burst_flag = 0u;
 
-	  if( time_to_measure_touch )
-        {
+	if( time_to_measure_touch )
+	{
+		/*  clear flag: it's time to measure touch  */
+		time_to_measure_touch = 0u;
 
-            /*  clear flag: it's time to measure touch  */
-            time_to_measure_touch = 0u;
-
-            do {
-				#ifdef _DEBUG_INTERFACE_
-				#ifdef _QDEBUG_TIME_STAMPS_
-						TIMESTAMP0;
-				#endif
-				#endif
-
-                /*  one time measure touch sensors    */
-                status_flag = qt_measure_sensors( current_time_ms_touch );
-
-				#ifdef _DEBUG_INTERFACE_
-				#ifdef _QDEBUG_TIME_STAMPS_
-					  TIMESTAMP2;
-				#endif
-				#endif
-
-                burst_flag = status_flag & QTLIB_BURST_AGAIN;
+		do
+		{
 #ifdef _DEBUG_INTERFACE_
-                /* send debug data */
-                QDebug_SendData(status_flag);
-                /* Process commands from PC */
-            	QDebug_ProcessCommands();
+	#ifdef _QDEBUG_TIME_STAMPS_
+			TIMESTAMP0;
+	#endif
 #endif
-			#ifdef _DEBUG_INTERFACE_
-			#ifdef _QDEBUG_TIME_STAMPS_
-				TIMESTAMP3;
-			#endif
-			#endif
+			/*  one time measure touch sensors    */
+			status_flag = qt_measure_sensors( current_time_ms_touch );
 
-                /* Time-critical host application code goes here */
+#ifdef _DEBUG_INTERFACE_
+	#ifdef _QDEBUG_TIME_STAMPS_
+			TIMESTAMP2;
+	#endif
+#endif
+			burst_flag = status_flag & QTLIB_BURST_AGAIN;
+				
+#ifdef _DEBUG_INTERFACE_
+			/* send debug data */
+			QDebug_SendData(status_flag);
+			/* Process commands from PC */
+			QDebug_ProcessCommands();
+#endif
 
-            }while (burst_flag) ;
+#ifdef _DEBUG_INTERFACE_
+	#ifdef _QDEBUG_TIME_STAMPS_
+			TIMESTAMP3;
+	#endif
+#endif
 
-        }
+			/* Time-critical host application code goes here */
+
+		} while(burst_flag);
+			
+	}	// if( time_to_measure_touch )
 }
 
 
@@ -309,18 +295,16 @@ Output  :   n/a
 Notes   :   Generated Code from QTouch Studio. Do not change
 ============================================================================*/
 
-static void qt_set_parameters( void )
+static inline void qt_set_parameters( void )
 {
-
-/*  This will be modified by the user to different values   */
-qt_config_data.qt_di              = 2;
-qt_config_data.qt_neg_drift_rate  = 20;
-qt_config_data.qt_pos_drift_rate  = 5;
-qt_config_data.qt_max_on_duration = 0;
-qt_config_data.qt_drift_hold_time = 20;
-qt_config_data.qt_recal_threshold = 1;
-qt_config_data.qt_pos_recal_delay = 0;
-
+	/*  This will be modified by the user to different values   */
+	qt_config_data.qt_di              = 2;
+	qt_config_data.qt_neg_drift_rate  = 20;
+	qt_config_data.qt_pos_drift_rate  = 5;
+	qt_config_data.qt_max_on_duration = 0;
+	qt_config_data.qt_drift_hold_time = 20;
+	qt_config_data.qt_recal_threshold = 1;
+	qt_config_data.qt_pos_recal_delay = 0;
 }
 
 /*============================================================================
@@ -331,7 +315,7 @@ Input   :   n/a
 Output  :   n/a
 Notes   :   Generated code from QTouch Studio. Do not change
 ============================================================================*/
-static void config_sensors(void)
+static inline void config_sensors(void)
 {
 	qt_enable_key( CHANNEL_0, NO_AKS_GROUP, 10u, HYST_6_25 );
 	qt_enable_key( CHANNEL_1, NO_AKS_GROUP, 10u, HYST_6_25 );
@@ -339,7 +323,4 @@ static void config_sensors(void)
 	qt_enable_key( CHANNEL_3, NO_AKS_GROUP, 10u, HYST_6_25 );
 	qt_enable_key( CHANNEL_4, NO_AKS_GROUP, 10u, HYST_6_25 );
 	qt_enable_key( CHANNEL_5, NO_AKS_GROUP, 10u, HYST_6_25 );
-
 }
-
-
