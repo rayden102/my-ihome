@@ -41,8 +41,8 @@
 ----------------------------------------------------------------------------*/
 #include <avr/io.h>
 #include <avr/interrupt.h>
-#define __delay_cycles(n)     __builtin_avr_delay_cycles(n)
-#define __enable_interrupt()  sei()
+/* #define __delay_cycles(n)     __builtin_avr_delay_cycles(n)
+#define __enable_interrupt()  sei() */
 
 #include "touch_api.h"
 #include "touch.h"
@@ -123,6 +123,13 @@ static int usart_putchar(char a_inChar, FILE *stream)
 	return 0;
 }
 
+ISR(TCD0_OVF_vect)
+{
+	printf("? %d\n", current_time_ms_touch);
+}
+
+#define TIMER_KEEPALIVE TCD0
+
 /*============================================================================
 Name    :   main
 ------------------------------------------------------------------------------
@@ -133,29 +140,59 @@ Notes   :
 ============================================================================*/
 
 int main( void )
-{
-
-   /* initialize host app, pins, watchdog, etc */
+{  
+	cli();
+	
+	/* initialize host app, pins, watchdog, etc */
     init_system();
-
-    /* configure timer ISR to fire regularly */
-    init_timer_isr();
 
 	/* Initialize Touch sensors */
 	touch_init();
+
+	/* configure timer ISR to fire regularly */
+	init_timer_isr();
 
 	/* Redirect stream to standard output */
 	stdout = &mystdout;
 
 	/* Send welcome message */
 	printf("Lightning Wall Sensor\n");
+	/* Write address */
+	printf("Address: %#x\n", (PORTB_IN & 0x0F));
+	
+	printf("PMIC.CTRL: %#x\n", PMIC_CTRL);
+	printf("TCC0.INTCTRLB: %#x\n", TCC0.INTCTRLB);
+	printf("TCC0.PER: %#x\n", TCC0.PER);
+	
+	/********************************************//**
+	 * Timer configuration section
+	 ***********************************************/
+	
+	/* Enable the 4sec timer */
+	
+	TIMER_KEEPALIVE.CTRLB		= (TIMER_KEEPALIVE.CTRLB & ~TC0_WGMODE_gm) | TC_WGMODE_NORMAL_gc;
+	TIMER_KEEPALIVE.CTRLFSET	= 0;																	// set UP direction
+	TIMER_KEEPALIVE.PER			= 31250;												// set defined period
+	TIMER_KEEPALIVE.INTCTRLA	= TIMER_KEEPALIVE.INTCTRLA & ~TC0_OVFINTLVL_gm;							// set overflow interrupt
+	TIMER_KEEPALIVE.INTCTRLA	= TIMER_KEEPALIVE.INTCTRLA | TC_OVFINTLVL_MED_gc;	// set low-level overflow interrupt
+	TIMER_KEEPALIVE.CTRLA		= (TIMER_KEEPALIVE.CTRLA & ~TC0_CLKSEL_gm) | TC_CLKSEL_DIV1024_gc;
 
+	/*  enable low lever interrupts in power manager interrupt control  */
+	PMIC.CTRL |= PMIC_LOLVLEN_bm | PMIC_MEDLVLEN_bm | PMIC_HILVLEN_bm;
+	
 	sei();
 
     /* loop forever */
     for( ; ; )
     {
-        touch_measure();
+	    touch_measure();
+		
+		printf("Sensor[0]: %d\n", GET_SENSOR_STATE(0));
+		printf("Sensor[1]: %d\n", GET_SENSOR_STATE(1));
+		printf("Sensor[2]: %d\n", GET_SENSOR_STATE(2));
+		printf("Sensor[3]: %d\n", GET_SENSOR_STATE(3));
+		printf("Sensor[4]: %d\n", GET_SENSOR_STATE(4));
+		printf("Sensor[5]: %d\n", GET_SENSOR_STATE(5));
 
     /*  Time Non-critical host application code goes here  */
     }
