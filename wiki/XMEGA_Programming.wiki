@@ -1,0 +1,75 @@
+#summary XMEGA AVR uP programming tips.
+
+= Introduction =
+
+Add your content here.
+
+= CRC calculation hardware engine =
+
+== CRC-16 calculation using ASF ==
+{{{
+// CRC-16 checksum
+uint16_t g_u32crc16_checksum;
+
+// Calculate CRC-16 checksum for the data using ASF
+g_u32crc16_checksum = crc_io_checksum((void *)&xmegaSerialNumber.u8DataArray[0], 11, CRC_16BIT);
+printf("SNum crc-16: 0x%04x\n", g_u32crc16_checksum);
+}}}
+
+== CRC-16 calculation using AVR-GCC library ==
+xmodem version
+
+{{{
+uint16_t crc = 0;
+    for( uint8_t u8idx = 0; u8idx < 11; u8idx++)
+	crc = _crc_xmodem_update(crc, xmegaSerialNumber.u8DataArray[u8idx]);
+
+    printf("crc-16 xmodem: 0x%04x\n", crc); */
+}}}
+
+== CRC-16 calculation (CRC-CCITT) using XMEGA hardware CRC peripheral ==
+
+{{{
+// CRC-16(CRC-CCITT) Polynomial x^16 + x^12 + x^5 + 1 --> 0x1021
+uint16_t xmega_calculate_checksum_crc16(uint8_t *a_pData, uint8_t count)
+{
+	uint8_t i = 0;
+	uint16_t crc16_checksum = 0;
+	
+	// Reset all 4 checksum register to 0x00
+	CRC_CTRL |= CRC_RESET_RESET0_gc;
+	
+	// The CRC registers will be reset one peripheral clock cycle after the RESET[1] bit is set
+	_NOP();
+	
+	// Configure xmega CRC engine to CRC-16 computation
+	CRC_CTRL &= ~CRC_CRC32_bm;
+	
+	// Set IO as a CRC source
+	CRC_CTRL = (CRC_CTRL & (~CRC_SOURCE_gm)) | CRC_SOURCE_IO_gc;
+	
+	for(i = 0; i < count; i++)
+	{
+		CRC_DATAIN = a_pData[i];		
+	}
+
+	// Signal CRC complete
+	CRC_STATUS |= CRC_BUSY_bm;
+	
+	// Check if the CRC module is busy
+	while((CRC_STATUS & CRC_BUSY_bm) == CRC_BUSY_bm);
+	
+	crc16_checksum = ((uint16_t)CRC_CHECKSUM0 & 0x00FF);
+	crc16_checksum |= (((uint16_t)CRC_CHECKSUM1 << 8) & 0xFF00);
+	
+	// Stop engine by disabling the source
+	CRC_CTRL = (CRC_CTRL & (~CRC_SOURCE_gm)) | CRC_SOURCE_DISABLE_gc;
+	
+	return crc16_checksum;
+}
+
+// Calculate CRC-16 (CRC-CCITT) using XMEGA hardware CRC peripheral
+g_u16crc16_checksum = xmega_calculate_checksum_crc16(&xmegaSerialNumber.u8DataArray[0], 11);
+
+printf("crc-16: 0x%04x\n", g_u16crc16_checksum);
+}}}
