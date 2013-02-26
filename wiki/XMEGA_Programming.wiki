@@ -73,3 +73,30 @@ g_u16crc16_checksum = xmega_calculate_checksum_crc16(&xmegaSerialNumber.u8DataAr
 
 printf("crc-16: 0x%04x\n", g_u16crc16_checksum);
 }}}
+
+= Generating random value =
+
+== Using Analog-to-Digital peripheral ==
+
+{{{
+	/************************************************************************/
+	/* ADC                                                                  */
+	/************************************************************************/
+	ADCA.CTRLA = ADC_ENABLE_bm;	// enable ADC
+	ADCA.CTRLB = ADC_RESOLUTION_12BIT_gc;	// 12bit right adjusted
+	ADCA.REFCTRL = ADC_REFSEL_VCC_gc; //ADC_REFSEL_INT1V_gc;	// Internal Voltage reference 1.0V
+	ADCA.PRESCALER = ADC_PRESCALER_DIV64_gc;	// 8MHz/64 = 125kHz
+	ADCA.CALL = nvm_production_signature_row_byte(offsetof(NVM_PROD_SIGNATURES_t, ADCACAL0) );
+	ADCA.CALH = nvm_production_signature_row_byte(offsetof(NVM_PROD_SIGNATURES_t, ADCACAL1) );
+	ADCA.CH0.CTRL = ADC_CH_INPUTMODE_SINGLEENDED_gc;	// single-ended input mode
+	ADCA.CH0.MUXCTRL = ADC_CH_MUXPOS_PIN5_gc;	// input pin 5
+	
+	// Start conversion
+	ADCA.CH0.CTRL |= ADC_CH_START_bm;
+	// Wait for conversion to finish
+	while(ADCA.CH0.INTFLAGS != ADC_CH_CHIF_bm);
+	// Get the conversion result
+	uint16_t u16ConvResult = ADCA.CH0RES;
+	
+	printf("ADC conversion result = %i\n", u16ConvResult);
+}}}
