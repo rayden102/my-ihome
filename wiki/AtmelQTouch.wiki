@@ -1,0 +1,28 @@
+#summary QTouch capacitive touch solutions on Atmel uC.
+
+= QMatrix =
+== 5.6.7.2 QMatrix acquisition method constraints ==
+
+In case of XMEGA™ devices, the resources are used internal to the library and hence cannot be used by the host application
+  * Timer/Counter 1 on PORTC (TCC1)
+  * Analog Comparator on PORTA (ACA)
+  * Event System Channel0 (EVSYS_CH0)
+
+The AIN0 pin of the device needs to be connected to the GND.
+  * In case of XMEGA devices, the *reference pin for input to analog comparator is Pin7 of PORTA with all the combinations of libraries* supported. Hence, this needs to be connected to GND.
+
+== 5.8.2 Pin Configuration for QMatrix Acquisition Method ==
+The QMatrix acquisition method libraries needs to be used after configuring X and YA and YB lines on IO pins of the port as described in the configuration rules described in the section below. The QTouch Studio Pin Configurator Wizard can be used to assign X, YA, YB, SMP lines on the pins and rules are internally taken care in the Qtouch Studio Pin Configurator Wizard.
+
+The snippets can be taken from the QTouch Studio Pin Configurator Wizard and copied to appropriate places in the main.c and touch_ config.h files in the example projects provided.
+
+=== 5.8.2.1 Configuration Rules: ===
+  # The X lines can be configured on different ports up to a maximum of 3 ports. Ex: NUM_X_PORTS = 3 (maximum value supported). However the possible values are NUM_X_PORTS = 1 or NUM_X_PORTS = 2 or NUM_X_PORTS = 3
+  # The X lines can be configured on the three different ports.
+  # The X lines can be configured on any pins of the ports selected above. Ex: X0 on PB2, X1 on PD5, X2 on PE0, X3 on PD1( when NUM_X_LINES= 4), Provided that these pins do not conflict with the other pins for touch sensing or with the host application usage.
+  # The Y lines can be configured on the any of the pins of the ports selected. Ex: Any pins on the PORT_YA and PORT_YB selected. Suppose, PORT_YA is D, and PORT_YB is C. Since, pin 5 and pin 1 PORTD are already used for X lines(X1, X3), the user can select any of the remaining pins for Y0A lines. Suppose that Y0 is on pin2 and Y1 is on pin6. Hence, Y0A – PD2, Y0B – PC2, Y1A – PD6, Y1B – PC6,
+  # All the Qmatrix usage Pins X lines,YA lines, YB lines and SMP line can be on same port.Both YA and YB lines can share the same port. And the YA and YB need not be on same corresponding pins of the ports.The Macro SHARED_YAYB should be defined as 1 if YA and YB are on same port else should be defined as 0.
+  # *The PORT_YB is fixed for each device and should be same as the PORT on which the ADC input pins are available.*
+  # The SMP pin can be configured on any of the IO PORT pins available.
+Ex: PORT_SMP = D
+SMP_PIN = 7 as this pin is not being used by touch sensing.
