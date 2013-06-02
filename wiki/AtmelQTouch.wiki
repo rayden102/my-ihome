@@ -26,3 +26,22 @@ The snippets can be taken from the QTouch Studio Pin Configurator Wizard and cop
   # The SMP pin can be configured on any of the IO PORT pins available.
 Ex: PORT_SMP = D
 SMP_PIN = 7 as this pin is not being used by touch sensing.
+
+== Atmel Studio Help ==
+=== X & Y Port-Pin selection page ===
+The X and Y Line Selection Page allows the user to select a port and pin for each of the X- and Y-lines. As with the QTouch touch technology, the list of pins available for selection will be dependend on the number of pins provided for each port. This will be dictated by MCU architecture, 8 or 32-bit will correspond to 8 or 32 pins per port.
+
+In addition to the general X- and Y-lines, some special pins needs to be placed on a port and pin as well.
+
+  * YB-ADC port (this is generally fixed based on the MCU selected)
+  * AIN0 port (fixed based on the MCU selected)
+  * SMP port
+
+=== Rules & Guidelines ===
+
+  * Same port cannot be used more than once.
+  * The X-lines can be assigned pins from up to 3 different ports.
+  * The X-lines can be configured on any pin of the ports selected for X-lines provided that these pins do not conflict with the other pin usage, either by the QTouch Library or by the host application.
+  * The Y-lines can be configured on any pin of the ports selected for Y-lines provided that these pins do not conflict with the other pin usage, either by the QTouch Library or by the host application. Also, ports YA and YB are linked regarding pin usage. E.g. if pin 1 is used by port YA then the corresponding pin on YB is also used as these need to work together.
+  * The YB port is fixed for each specific device and will be (one of) the ADC port(s) of the MCU.
+  * The SMP pin can be configured on any of the available port pins.
