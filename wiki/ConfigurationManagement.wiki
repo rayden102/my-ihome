@@ -26,4 +26,5 @@ XMEGA uC use PDI as programming interface. Two solutions has been tested and wor
 USB AVR PROG MKII was tested and is working fine with XMEGAs A and D series. In addition this programmer provides power supply to programmed device eliminating need for use external supply. Description can be found here [http://www.sibit.pl/sklep/?25,usb-avr-prog-mkii clone].
 
 = Concurrent Versioning System =
-As the primary versioning system SVN is being used. For Windows operating systems one can use a Subversion client *TortoiseSVN* available [http://tortoisesvn.tigris.org/ here].
+ # As the primary versioning system SVN is being used. For Windows operating systems one can use a Subversion client *TortoiseSVN* available [http://tortoisesvn.tigris.org/ here].
+ # The other solution is to use AnkhSVN plugin to Atmel Studio accessible from Atmel Gallery. More details can be found [http://ankhsvn.open.collab.net/ here].
