@@ -33,3 +33,7 @@ USB AVR PROG MKII was tested and is working fine with XMEGAs A and D series. In 
 Detailed information and how-to is available at the following location [https://code.google.com/p/my-ihome/source/checkout how-to].
  * Hint: In case of first repository creation use the following location/address: 'https://my-ihome.googlecode.com/svn/trunk/'
 (secured protocol version *https* must be used).
+ * Put your code under /trunk/Software/ location.
+
+== [for future use] BitBucket ==
+ # Location: https://bitbucket.org/tfidecki/myhome
