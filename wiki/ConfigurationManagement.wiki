@@ -33,7 +33,17 @@ USB AVR PROG MKII was tested and is working fine with XMEGAs A and D series. In 
 Detailed information and how-to is available at the following location [https://code.google.com/p/my-ihome/source/checkout how-to].
  * Hint: In case of first repository creation use the following location/address: 'https://my-ihome.googlecode.com/svn/trunk/'
 (secured protocol version *https* must be used).
- * Put your code under /trunk/Software/ location.
+ * Put your code under _/trunk/Software/your_module_here_ location.
 
 == [for future use] BitBucket ==
  # Location: https://bitbucket.org/tfidecki/myhome
+
+= Hardware design =
+Due to large components database and community support it is preferred to use CadSoft Eagle application for schematics and PCB design.
+
+ # Many tutorials are available on Sparkfun webpages [https://www.sparkfun.com/tutorials/115 BetterPCBs]
+
+== Design rules ==
+At this time please follow the rules defined by Sparkfun [http://hades.mech.northwestern.edu/images/0/08/Eagle_Rules.pdf EagleRules]
+
+It is always good to know your final PCB will look like in reality. There are many tutorials available to create 3D model from Eagle. Rendered PCB allows to see how packages are placed on the PCB. It is a way to eliminate design bugs before manufacturing.
