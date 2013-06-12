@@ -1,16 +1,15 @@
 #summary One-sentence summary of this page.
 
 = Programming Environment =
-As programming environment Atmel Studio was chosen due to its integration and comprehensive solution. Out of the box user receives IDE, cross-compiler (avr-gcc), device programming tooling and more. Functionality may also be enhanced with Atmel Gallery (plug-in like extension platform).
+As programming environment Atmel Studio was chosen due to its integration and comprehensive solution. Out of the box user receives IDE, cross-compiler (avr-gcc), device programming tooling, simulator, debugger and more. Functionality may also be enhanced with Atmel Gallery (plug-in like extension platform).
 
 == Atmel Software Framework ==
-ASF is a set of 
+The ASF is a MCU software library providing a large collection of embedded software for MCUs. Normally integrated with AtmelStudio, however latest version can be found here [http://www.atmel.com/tools/AVRSOFTWAREFRAMEWORK.aspx ASF].
 
 Other approach is to use Linux environment and Eclipse as IDE.
 
 == Atmel Studio ==
 Latest version available on Atmel's site [http://www.atmel.com/tools/ATMELSTUDIO.aspx AtmelStudio].
-
 
 = Microcontroller =
 To satisfy project needs AVR XMEGA uC was chosen as a primary device to run real-time applications.
@@ -21,3 +20,7 @@ System blocks are targetted on D4 series MCU and ATxmega32D4 specifically.
 More information can be found here: [http://www.atmel.com/devices/ATXMEGA32D4.aspx 32D4].
 
 D4 offers enough processing power and internal interfaces and peripherals to run applications with specific tasks.
+
+== In-System Programmer (ISP) ==
+XMEGA uC use PDI as programming interface. Two solutions has been tested and working fine under Atmel Studio 6. First is Atmel's AVR JTAGICE mkII [http://www.atmel.com/tools/AVRJTAGICEMKII.aspx here]. The latter is a clone of original device supplied by 3rd party companies.
+USB AVR PROG MKII was tested and is working fine with XMEGAs A and D series. In addition this programmer provides power supply to programmed device eliminating need for use external supply. Description can be found here [http://www.sibit.pl/sklep/?25,usb-avr-prog-mkii clone].
