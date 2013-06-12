@@ -24,3 +24,6 @@ D4 offers enough processing power and internal interfaces and peripherals to run
 == In-System Programmer (ISP) ==
 XMEGA uC use PDI as programming interface. Two solutions has been tested and working fine under Atmel Studio 6. First is Atmel's AVR JTAGICE mkII [http://www.atmel.com/tools/AVRJTAGICEMKII.aspx here]. The latter is a clone of original device supplied by 3rd party companies.
 USB AVR PROG MKII was tested and is working fine with XMEGAs A and D series. In addition this programmer provides power supply to programmed device eliminating need for use external supply. Description can be found here [http://www.sibit.pl/sklep/?25,usb-avr-prog-mkii clone].
+
+= Concurrent Versioning System =
+As the primary versioning system SVN is being used. For Windows operating systems one can use a Subversion client *TortoiseSVN* available [http://tortoisesvn.tigris.org/ here].
