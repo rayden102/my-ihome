@@ -46,7 +46,10 @@ Due to large components database and community support it is preferred to use Ca
  # Many tutorials are available on Sparkfun webpages [https://www.sparkfun.com/tutorials/115 BetterPCBs]
 
 == Design rules ==
-At this time please follow the rules defined by Sparkfun [http://hades.mech.northwestern.edu/images/0/08/Eagle_Rules.pdf EagleRules]
+At this time it is recommended to follow the rules defined by Sparkfun [http://hades.mech.northwestern.edu/images/0/08/Eagle_Rules.pdf EagleRules]
 
 It is always good to know your final PCB will look like in reality. There are many tutorials available to create 3D model from Eagle. Google will assist you [https://www.google.pl/#sclient=psy-ab&q=eagle+3d+tutorial&oq=eagle+3d+tut&gs_l=hp.3.0.0j0i30j0i5i30j0i8i30.1059.3184.0.4307.12.11.0.1.1.0.155.1455.0j11.11.0...0.0.0..1c.1.17.psy-ab.Hdl7zDgDxhE&pbx=1&bav=on.2,or.r_cp.r_qf.&bvm=bv.47810305,d.bGE&fp=ad2cd779562d336e&biw=1440&bih=799 helpMe].
 Rendered PCB allows to see how packages are placed on the PCB. It is a way to eliminate design bugs before manufacturing.
+
+== Interference reduction ==
+Article here [http://www.forbot.pl/forum/topics20/dla-poczatkujacych-zaklocenia-w-pracy-mikrokontrolerow-poradnik-praktyczny-dla-robotykow-vt6913.htm Powering_uC]
