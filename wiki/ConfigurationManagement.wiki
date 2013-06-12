@@ -27,4 +27,8 @@ USB AVR PROG MKII was tested and is working fine with XMEGAs A and D series. In 
 
 = Concurrent Versioning System =
  # As the primary versioning system SVN is being used. For Windows operating systems one can use a Subversion client *TortoiseSVN* available [http://tortoisesvn.tigris.org/ here].
- # The other solution is to use AnkhSVN plugin to Atmel Studio accessible from Atmel Gallery. More details can be found [http://ankhsvn.open.collab.net/ here].
+ # The other solution is to use AnkhSVN plugin to Atmel Studio. Installation is available from Atmel Gallery. More details can be found [http://ankhsvn.open.collab.net/ here].
+
+== Repository at code.google.com ==
+Detailed information and how-to is available at the following location [https://code.google.com/p/my-ihome/source/checkout how-to].
+ * Hint: In case of first repository creation use the following location/address: 'https://my-ihome.googlecode.com/svn/trunk/'
